@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Feb 16 17:04:53 2016
+
+@author: cdesbois
+"""
+
+build a module that allows to use the blood gases functions:
+done
+
+build a mutiple input GUI
+entry widget:
+see http://www.python-course.eu/tkinter_entry_widgets.php
+
+
+make a table output of the measured values
+
+make a bg class to clarify the code
+
+make a homogenous description allowing an usage from mainrecord.py
