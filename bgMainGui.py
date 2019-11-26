@@ -1,12 +1,15 @@
 #! /Users/cdesbois/anaconda3/bin/python
 # -*- coding: utf-8 -*-
 
+
+"""
+a pyQt module to plot arterial blood gases
+"""
+import sys
+import copy
 import bgplot as bg
 
-
-gases, gasesV = [], {}
-
-import sys
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
     QMainWindow, QApplication, QWidget, QAction,
     QTableWidget, QTableWidgetItem,
@@ -14,7 +17,6 @@ from PyQt5.QtWidgets import (
     QMessageBox, QGroupBox, QGridLayout)
 # QTableView?
 # from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
 import copy
 
 # initialise the 'gases' list and add a fisrt reference value g0
@@ -26,7 +28,6 @@ gasesV['g0'] = g0.__dict__
 
 #buildTestSet2(reset=True, addNewG=False)
 
-import copy
 
 class SelectGas(QWidget):
     """
@@ -39,15 +40,15 @@ class SelectGas(QWidget):
         super().__init__()
         global gases, gasesV
         self.title = 'gas'+str(len(gases)-1)
-        self.left   = 15
-        self.top    = 10
-        self.width  = 140
+        self.left = 15
+        self.top = 10
+        self.width = 140
         self.height = 450
-        self.gases  = gases
+        self.gases = gases
         self.gasesV = gasesV
-        self.num    = len(gases)-1
-        self.tot    = len(gases)
-        self.bgObj  = copy.deepcopy(gases[self.num])
+        self.num = len(gases)-1
+        self.tot = len(gases)
+        self.bgObj = copy.deepcopy(gases[self.num])
         self.gasKey = ['num', 'spec', 'hb', 'fio2', 'po2',
                        'ph', 'pco2', 'hco3', 'etco2']
         #self.gasVal = {}  # to record displayed values
@@ -98,8 +99,8 @@ class SelectGas(QWidget):
 
     def defaults_Values(self, num=0):
         #print('f= defaults_Values')
-        self.bgObj  = copy.deepcopy(self.gases[num])
-        self.num    = num
+        self.bgObj = copy.deepcopy(self.gases[num])
+        self.num = num
         for key in self.gasKey:
             if key != 'num':
                 setattr(self, key, getattr(self.bgObj, key))
@@ -143,7 +144,7 @@ class SelectGas(QWidget):
     def table_to_self(self, num):
         # TODO : add a test to allow a 0,5 to be transformed to float
         #print('f=table_to_self')
-        self.num =  len(gases)
+        self.num = len(gases)
         self.spec = str(self.tableWidget.item(1, 0).text())
         for i, key in enumerate(self.gasKey[2:]):
             setattr(self, key, float(self.tableWidget.item(i+2, 0).text()))
@@ -171,8 +172,8 @@ class SelectGas(QWidget):
         """
         #print('\n', "f=update_Values, targetNum= ", num, 'currentNum= ', self.num)
         #self.print_gas('changeGas before')
-        self.bgObj  = copy.deepcopy(self.gases[num])
-        self.num    = num
+        self.bgObj = copy.deepcopy(self.gases[num])
+        self.num = num
         for key in self.gasKey:
             if key != 'num':
                 setattr(self, key, getattr(self.bgObj, key))
@@ -195,7 +196,7 @@ class SelectGas(QWidget):
 #            self.print_gas('after previous gas')
         else:
             msgBox = QMessageBox.information(self, 'str',
-                                        " this is already the first gas" )
+                                             " this is already the first gas")
 
     @pyqtSlot()  # create the method
     def next_gas(self):
@@ -206,7 +207,7 @@ class SelectGas(QWidget):
 
         if self.num == (len(gases)-1):
             msgBox = QMessageBox.information(self, 'str',
-                                        " this is already the last gas" )
+                                             " this is already the last gas")
         else:
             num += 1
             #print('change_gas(', num, ')')
@@ -402,7 +403,7 @@ import sys, csv
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import(QApplication, QMainWindow, QWidget, QVBoxLayout,
                             QSizePolicy, QAction, QMessageBox, QFileDialog,
-                            QTextEdit )
+                            QTextEdit)
 # Numpy functions for image creation
 import numpy as np
 from matplotlib.figure import Figure
@@ -523,18 +524,15 @@ class ApplicationWindow(QMainWindow):
         self.toolBar.addAction(nextP)
         self.toolBar.addAction(selectParams)
 
-    def build_plots(self, plotNum = 0, case = 'clin', path = 'toto',
-            save =  False, ident = '', pyplot = False):
-        #print('f=build_plots')
-        #print('len Gases.gasesList', len(bg.Gas.return_gasList()))
-        #print('build_plot: self.gas.num= ', self.gas.num)
+    def build_plots(self, plotNum=0, case='clin', path='toto',
+                    save=False, ident='', pyplot=False):
         self.plotNum = plotNum        # reset the plot count
-        num =   self.gas.num
+        num = self.gas.num
         gases = copy.deepcopy(self.gas.gases)       # ??? needed
         self.plotObjList = []
         #print('sending num=', num, 'hb=', gases[num].hb)
         self.select_plots('clin', self.gas.gases, self.gas.num,
-                            path, ident, save, pyplot)
+                          path, ident, save, pyplot)
         #print('sending num=', num)
         self.fig = self.plotObjList[self.plotNum]
         self.update_central_widget()
@@ -553,7 +551,7 @@ class ApplicationWindow(QMainWindow):
             self.update_central_widget()
         else:
             msgBox = QMessageBox.information(self, 'str',
-                        "this is already the first plot" )
+                                             "this is already the first plot")
 
     def next_plot(self):
         # print('f=next_plot')
@@ -577,8 +575,8 @@ class ApplicationWindow(QMainWindow):
     def close_application(self):
         #print('f=close_application')
         choice = QMessageBox.question(self, 'Extract',
-                                            "Do you really want to quit ?",
-                                            QMessageBox.Yes | QMessageBox.No)
+                                      "Do you really want to quit ?",
+                                      QMessageBox.Yes | QMessageBox.No)
         if choice == QMessageBox.Yes:
             sys.exit()
         else:
@@ -598,8 +596,9 @@ class ApplicationWindow(QMainWindow):
                 self.texEdit.setText(text)
 
     def plot_now(self, name, gases, num, path, ident, save, pyplot, percent):
-        plotList = ['display', 'morpion', 'acidBAse', 'o2', 'ventil', 'sat', 'cao2', 'hbEffect',
-            'varCaO2', 'pieCasc', 'cascO2', 'gAa', 'GAaRatio', 'ratio']
+        plotList = ['display', 'morpion', 'acidBAse', 'o2', 'ventil', 'sat',
+                    'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2', 'gAa',
+                    'GAaRatio', 'ratio']
         # print(name)
         if name not in plotList:
             print('the resquested plot should be in ', plotList)
@@ -633,9 +632,8 @@ class ApplicationWindow(QMainWindow):
 #                self.plotObjList.append(bg.plot_cascO2Lin(gases, [0,len(gases)-1], path, ident, save, pyplot))
                 else :
                     self.plotObjList.append(
-                        bg.plot_cascO2Lin(gases, list(range(len(gases))), 
+                        bg.plot_cascO2Lin(gases, list(range(len(gases))),
                                           path, ident, save, pyplot))
-
             if name == 'gAa':
                 self.plotObjList.append(bg.plot_GAa(gases, num, path, ident, save, pyplot))
             if name == 'GAaRatio':
@@ -643,10 +641,9 @@ class ApplicationWindow(QMainWindow):
             if name == 'ratio':
                 self.plotObjList.append(bg.plot_ratio(gases, num, path, ident, save, pyplot))
             #print('len(self.plotObjList=', len(self.plotObjList))
-            
 #            for fig in self.plotObjList:
 #                fig.set_tight_layout(False)
-            
+
         else:
             if name == 'display':
                 bg.display(gases, num, path, ident, save, pyplot)
@@ -678,17 +675,19 @@ class ApplicationWindow(QMainWindow):
             if name == 'GAaRatio':
                 bg.plot_GAaRatio(gases, num, path, ident, save, pyplot)
             if name == 'ratio':
-                bg.plot_ratio(gases, num, path, ident, save, pyplot) 
+                bg.plot_ratio(gases, num, path, ident, save, pyplot)
 
     def select_plots(self, name, gases, num, path, ident, save, pyplot):
         """ select the plots to be build """
         #print('f select_plots')
         percent = False
         selections = {}
-        selections['all'] = ['display', 'morpion', 'acidBAse', 'o2', 'ventil', 'sat', 'cao2', 'hbEffect',
-            'varCaO2', 'pieCasc', 'cascO2', 'gAa', 'GAaRatio', 'ratio']
-        selections['clin'] = ['display', 'morpion', 'acidBAse', 'ventil', 'sat', 'cao2', 'hbEffect',
-            'varCaO2', 'pieCasc', 'cascO2', 'GAaRatio']
+        selections['all'] = ['display', 'morpion', 'acidBAse', 'o2', 'ventil',
+                  'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
+                  'gAa', 'GAaRatio', 'ratio']
+        selections['clin'] = ['display', 'morpion', 'acidBAse', 'ventil',
+                  'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
+                  'GAaRatio']
 
         if name == 'all':
             selection = selections['all']
@@ -696,7 +695,7 @@ class ApplicationWindow(QMainWindow):
             selection = selections['clin']
         else:
             print("name shoud be 'all' or 'clin'")
-            return(1)
+            return 1
 
         for item in selection:
             self.plot_now(item, gases, num, path, ident, save, pyplot, percent)
