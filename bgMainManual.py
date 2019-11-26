@@ -1,7 +1,7 @@
 #! /Volumes/USERS/cdesbois/anaconda/bin/python  ###########  /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-%reset -f
+#%reset -f
 # clear all the previous data
 #from IPython import get_ipython
 #get_ipython().magic('reset -sf')
@@ -17,7 +17,7 @@ import os, sys
 # buiding the path
 def buildPath():
     """
-    build path['root', 'data', 'utils', 'save']
+    build path['root', 'data', 'save']
     """
     path = {}
     root = '~'
@@ -52,20 +52,9 @@ def buildPath():
     if gethostname() == 'UC-0514':  # on pana (windows or linux)
         path['data'] = os.path.join(root, 'monitorData')
         path['save'] = os.path.join(root, 'fig')
-        os.chdir(path['data'])
-  
-    return(path)
+        os.chdir(path['data'])  
+    return path
 
-def appendUtils(paths):
-    """utils module"""
-    base = ['pg', 'utils']
-    base.insert(0, paths['root'])
-    modPath = os.path.expanduser(os.path.join(*base))
-    print('modPath= ', modPath)
-    # change the working directory
-    if modPath not in sys.path:
-        sys.path.append(modPath)
-        print('added', modPath, ' to the path')
 
 def anesthPlotPath(paths):
     """anesthPlot module """
@@ -89,14 +78,11 @@ def bloodGasesPath(paths):
         print('added', modPath, ' to the path')
 
 paths = buildPath()
-appendUtils(paths)
 anesthPlotPath(paths)
 bloodGasesPath(paths)
-import utils
 
 import bgplot as bg
 import anesthPlot as plot
-import utils
 
 
 gases, gasesV = [], {}
@@ -263,22 +249,19 @@ def plotFigs(gases, *args,  **kwargs):
                 bg.plot_GAaRatio, bg.plot_ratio]
                 }
     if params['reverse']:
-        # reverse the order of teh display
+        # reverse the order of the display
         for kind in ['all', 'clin']:
             plotDico[kind] = plotDico[kind][::-1]
     key = params['key']
     if key in plotDico.keys():
-        aList = plotDico[key]
+        funcList = plotDico[key]
     else:
-        allNames = [n.__name__ for n in plotDico['all']]
+        allNames = [func.__name__ for func in plotDico['all']]
         if key not in allNames:
             print('key shoud be in ', allNames)
             return
         else:
-            aList = []
-            for n in plotDico['all']:
-                if key == n.__name__: 
-                    aList.append(n)
+            funclist = [func for func in plotDico['all'] if func.__name__ == key]
     figList = []
     figNames = []
     path = params['path']
@@ -286,26 +269,26 @@ def plotFigs(gases, *args,  **kwargs):
     save = params['save']
     pyplot = params['pyplot']
     num = params['num']
-    for item in aList:
-        if item.__name__  == 'plot_cascO2Lin':
+    for func in funcList:
+        if func.__name__  == 'plot_cascO2Lin':
             # this function needs a list of gases 
             # measure + ref
-            fig = item(gases, [0, num], path, ident, save, pyplot)
+            fig = func(gases, [0, num], path, ident, save, pyplot)
             # all measures
             # fig = item(gases, list(range(len(gases))), path, ident, save, pyplot)
-        elif item.__name__  == 'plot_cascO2':
+        elif func.__name__  == 'plot_cascO2':
             # this function needs a list of gases 
             # measure + ref
-            fig = item(gases, [0, num], path, ident, save, pyplot)
+            fig = func(gases, [0, num], path, ident, save, pyplot)
             # all measures
             # fig = item(gases, list(range(len(gases))), path, ident, save, pyplot)
-        elif item.__name__ == 'plot_pieCasc':
-            fig = item(gases, num, path, ident='', save=save, percent=True, pyplot = pyplot)
-            fig = item(gases, num, path, ident='', save=save, percent=False, pyplot = pyplot)
+        elif func.__name__ == 'plot_pieCasc':
+            fig = func(gases, num, path, ident='', save=save, percent=True, pyplot = pyplot)
+            fig = func(gases, num, path, ident='', save=save, percent=False, pyplot = pyplot)
         else:
-            fig = item(gases, num, path, ident, save, pyplot)
+            fig = func(gases, num, path, ident, save, pyplot)
         figList.append(fig)
-        figNames.append(item.__name__.split('_')[-1])
+        figNames.append(func.__name__.split('_')[-1])
     return figList, figNames
 
 
