@@ -326,43 +326,58 @@ def phline(val):
     return a list containing the morpion display for pH
     """
     ref = [7.2, 7.35, 7.45, 7.5]
-    dico = {'norm':'-', 'bad':'x', 'vBad':'xx'}
-    arow = ['-', '–', '-']
+    # base
+    arrow = ['-', '-', '-']
+    #low´´
     if val < ref[0]:
-        arow[0] = dico['vBad']
-    elif val < ref[1]:
-        arow[0] = dico['bad']
-    elif val > ref[-1]:
-        arow[-1] = dico['vBad']
-    elif val > ref[-2]:
-        arow[-1] = dico['bad']
-    return arow
+        arrow[0] = '<<'
+    elif (ref[0] < val < ref[1]):
+        arrow[0] = 'x'
+    # middle
+    elif ref[1] < val < ref[2]:
+        arrow[1] = 'x'
+    #hight
+    elif ref[1] < val < ref[2]:
+        arrow[2] = 'x'
+    elif ref[3] < val < ref[2]:
+        arrow[2] = '>>'
+    return arrow
 
 def co2line(val):
     """
     return a list containing the morpion display for co2
     """
-    ref = [42, 38] # NB data are presented in acid , norm, basic order
-    dico = {'norm':'-', 'bad':'x', 'vBad':'xx'}
-    arow = ['-', '–', '-']
+    ref = [60, 42, 38, 30] # NB data are presented in acid , norm, basic order
+    arrow = ['-', '–', '-']
     if val > ref[0]:
-        arow[0] = dico['bad']
-    elif val < ref[1]:
-        arow[-1] = dico['bad']
-    return arow
+        arrow[0] = '<<'
+    elif ref[0] > val > ref[1]:
+        arrow[0] = 'x'
+    elif ref[1] > val > ref[2]:
+        arrow[1] = 'x'
+    elif ref[2] > val > ref[3]:
+        arrow[2] = 'x'
+    elif ref[3] > val:
+        arrow[2] = '>>'
+    return arrow
 
 def hco3line(val):
     """
     return a list containing the morpion display for hco3-
     """
-    ref = [22, 26]
-    dico = {'norm':'-', 'bad':'x', 'vBad':'xx'}
-    arow = ['-', '–', '-']
+    ref = [14, 22, 26, 32]
+    arrow = ['-', '–', '-']
     if val < ref[0]:
-        arow[0] = dico['bad']
-    elif val > ref[1]:
-        arow[-1] = dico['bad']
-    return arow
+        arrow[0] = '<<'
+    elif ref[0] < val < ref[1]:
+        arrow[0] = 'x'
+    elif ref[1] < val < ref[2]:
+        arrow[1] = 'x'
+    elif ref[2] < val < ref[3]:
+        arrow[1] = 'x'
+    elif ref[3] < val:
+        arrow[2] = '>>'
+    return arrow
 
 def morpion(gases, num, path, ident='', save=False, pyplot=False):
     """
@@ -378,10 +393,11 @@ def morpion(gases, num, path, ident='', save=False, pyplot=False):
 
     """
     # values
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0] #ref only
+    # if num >= 1:
+    #     gas = gases[num]
+    # else:
+    #     gas = gases[0] #ref only
+    gas = gases[num-1]
     title = 'ph='+ str(gas.ph) + '    pco2=' + str(gas.pco2) + '    hco3=' + str(gas.hco3)
     data = []
     data.append(phline(gas.ph))
@@ -1250,6 +1266,7 @@ def showPicture(files=[None], folderPath='~', title=''):
     """
     to include a picture
     """
+    folderPath = os.path.expanduser(folderPath)
     file = os.path.join(folderPath, files[0])
     if not os.path.isfile(file):
         print("file doesn't exist", file)
@@ -1265,6 +1282,7 @@ def showPicture(files=[None], folderPath='~', title=''):
         ax.axis('off')
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
+        fig.tight_layout()
         return fig
     elif len(files) == 2:
         for i, item in enumerate(files):
@@ -1275,6 +1293,7 @@ def showPicture(files=[None], folderPath='~', title=''):
             ax.axis('off')
             ax.xaxis.set_visible(False)
             ax.yaxis.set_visible(False)
+        fig.tight_layout()
         return fig
     else:
         print('can only plot two images')

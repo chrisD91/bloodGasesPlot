@@ -17,7 +17,6 @@ from PyQt5.QtWidgets import (
     QMessageBox, QGroupBox, QGridLayout)
 # QTableView?
 # from PyQt5.QtGui import QIcon
-import copy
 
 # initialise the 'gases' list and add a fisrt reference value g0
 # initialise a 'gasesV' visualisation dictionary to see the object in spyder
@@ -320,8 +319,10 @@ class SelectGas(QWidget):
 #                k += 1
 #                #print ('spec=', spec, 'hb=', hb ,'fio2=', fio2, 'po2=', po2,
 #                #         'ph=', ph, 'pco2=', pco2, 'hco3=', hco3)
-#                # print ('spec=', type(spec), 'hb=', type(hb) ,'fio2=', type(fio2), 'po2=', type(po2),
-#                #         'ph=', type(ph), 'pco2=', type(pco2), 'hco3=', type(hco3))
+#                # print ('spec=', type(spec), 'hb=', type(hb) ,'fio2=',
+#                           type(fio2), 'po2=', type(po2),
+#                #         'ph=', type(ph), 'pco2=', type(pco2), 'hco3=',
+#               type(hco3))
 #
 #            print ("added ", len(self.gases), 'gases to gases and gasesV')
 #
@@ -366,7 +367,8 @@ class SelectGas(QWidget):
 #    app.aboutToQuit.connect(app.deleteLater)
 #   sys.exit(app.exec_())
 
-# see http://stackoverflow.com/questions/10888045/simple-ipython-example-raises-exception-on-sys-exit
+# see http://stackoverflow.com/questions/10888045/
+#simple-ipython-example-raises-exception-on-sys-exit
 
 
 
@@ -395,7 +397,8 @@ class SelectGas(QWidget):
 #   9- implement the save function
 #   10- implement the 'choose parameters' function (the graphs to be displayed)
 
-# nb see http://stackoverflow.com/questions/31611188/why-does-matplotlib-figure-figure-behave-so-different-than-matplotlib-pyplot-fig
+# nb see http://stackoverflow.com/questions/31611188/
+# why-does-matplotlib-figure-figure-behave-so-different-than-matplotlib-pyplot-fig
 # ===============================================================================
 # to import the Figure in a QT Widget
 # for command-line arguments
@@ -605,41 +608,60 @@ class ApplicationWindow(QMainWindow):
             return
         if pyplot is False:
             if name == 'display':
-                self.plotObjList.append(bg.display(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.display(gases, num, path,\
+                                                   ident, save, pyplot))
             if name == 'morpion':
-                self.plotObjList.append(bg.morpion(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.morpion(gases, num, path,\
+                                                   ident, save, pyplot))
             if name == 'acidBAse':
-                self.plotObjList.append(bg.plot_acidbas(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_acidbas(gases, num, path,\
+                                                        ident, save, pyplot))
             if name == 'o2':
-                self.plotObjList.append(bg.plot_o2(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_o2(gases, num, path,\
+                                                   ident, save, pyplot))
             if name == 'ventil':
-                self.plotObjList.append(bg.plot_ventil(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_ventil(gases, num, path,\
+                                                       ident, save, pyplot))
             if name == 'sat':
-                self.plotObjList.append(bg.plot_satHb(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_satHb(gases, num, path, \
+                                                      ident, save, pyplot))
             if name == 'cao2':
-                self.plotObjList.append(bg.plot_CaO2(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_CaO2(gases, num, path,\
+                                                     ident, save, pyplot))
             if name == 'hbEffect':
-                self.plotObjList.append(bg.plot_hbEffect(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_hbEffect(gases, num, path,\
+                                                         ident, save, pyplot))
             if name == 'varCaO2':
-                self.plotObjList.append(bg.plot_varCaO2(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_varCaO2(gases, num, path,\
+                                                        ident, save, pyplot))
             if name == 'pieCasc':
-                self.plotObjList.append(bg.plot_pieCasc(gases, num, path, ident, save, True, pyplot))
-                self.plotObjList.append(bg.plot_pieCasc(gases, num, path, ident, save, False, pyplot))
+                self.plotObjList.append(bg.plot_pieCasc(gases, num, path,\
+                                                        ident, save, True, \
+                                                            pyplot))
+                self.plotObjList.append(bg.plot_pieCasc(gases, num, path, \
+                                                        ident, save, False,\
+                                                            pyplot))
             if name == 'cascO2':
                 if num == 0:
-                    self.plotObjList.append(bg.plot_cascO2Lin(gases, [0], path, ident, save, pyplot))
-#                self.plotObjList.append(bg.plot_cascO2(gases, [0,len(gases)-1], path, ident, save, pyplot))
-#                self.plotObjList.append(bg.plot_cascO2Lin(gases, [0,len(gases)-1], path, ident, save, pyplot))
-                else :
+                    self.plotObjList.append(bg.plot_cascO2Lin(gases, [0], path,\
+                                                              ident, save, pyplot))
+#                self.plotObjList.append(bg.plot_cascO2(gases, \
+    # [0,len(gases)-1], path, ident, save, pyplot))
+#                self.plotObjList.append(bg.plot_cascO2Lin(gases, \
+    # [0,len(gases)-1], path, ident, save, pyplot))
+                else:
                     self.plotObjList.append(
                         bg.plot_cascO2Lin(gases, list(range(len(gases))),
                                           path, ident, save, pyplot))
             if name == 'gAa':
-                self.plotObjList.append(bg.plot_GAa(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_GAa(gases, num, path,\
+                                                    ident, save, pyplot))
             if name == 'GAaRatio':
-                self.plotObjList.append(bg.plot_GAaRatio(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_GAaRatio(gases, num, path,\
+                                                         ident, save, pyplot))
             if name == 'ratio':
-                self.plotObjList.append(bg.plot_ratio(gases, num, path, ident, save, pyplot))
+                self.plotObjList.append(bg.plot_ratio(gases, num, path,\
+                                                      ident, save, pyplot))
             #print('len(self.plotObjList=', len(self.plotObjList))
 #            for fig in self.plotObjList:
 #                fig.set_tight_layout(False)
@@ -669,7 +691,8 @@ class ApplicationWindow(QMainWindow):
             if name == 'cascO2':
 #                bg.plot_cascO2(gases, [0, len(gases)-1], path, ident, save, pyplot)
 #                bg.plot_cascO2Lin(gases, [0, len(gases)-1], path, ident, save, pyplot)
-                bg.plot_cascO2Lin(gases, list(range(len(gases)-1)), path, ident, save, pyplot)                
+                bg.plot_cascO2Lin(gases, list(range(len(gases)-1)), path,\
+                                  ident, save, pyplot)
             if name == 'gAa':
                 bg.plot_GAa(gases, num, path, ident, save, pyplot)
             if name == 'GAaRatio':
@@ -683,11 +706,11 @@ class ApplicationWindow(QMainWindow):
         percent = False
         selections = {}
         selections['all'] = ['display', 'morpion', 'acidBAse', 'o2', 'ventil',
-                  'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
-                  'gAa', 'GAaRatio', 'ratio']
+                             'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
+                             'gAa', 'GAaRatio', 'ratio']
         selections['clin'] = ['display', 'morpion', 'acidBAse', 'ventil',
-                  'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
-                  'GAaRatio']
+                              'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
+                              'GAaRatio']
 
         if name == 'all':
             selection = selections['all']
