@@ -441,26 +441,33 @@ def plot_evol_o2co2(df):
     """
     fig = plt.figure(figsize=(8, 4))
     fig.suptitle('respiratoire', color='tab:gray')
+    # o2
     ax = fig.add_subplot(111)
     ax.plot(df.po2, '-o', color='tab:red', ms=10)
     ax.set_ylabel('$Pa 0_2$', color='tab:red')
     ax.spines['left'].set_color('tab:red')
     ax.tick_params(axis='y', colors='tab:red')
+    ax.axhline(90, color='tab:red', linestyle='dashed', alpha=.4, linewidth=3)
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
-
+    #co2
     axT = ax.twinx()
     axT.plot(df.pco2, '-o', color='tab:blue', ms=10)
     axT.set_ylabel('$Pa C0_2$', color='tab:blue')
     axT.spines['right'].set_color('tab:blue')
     axT.tick_params(axis='y', colors='tab:blue')
+    axT.axhline(40, color='tab:blue', linestyle='dashed', alpha=.6, linewidth=3)
     for spine in ['top', 'left']:
         axT.spines[spine].set_visible(False)
-
+    # gas_list = df.num.astype(int).astype(str).to_list()
+    # gas_list = ['gas' + item for item in gas_list]
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(np.arange(len(df)))
+        # ax.xaxis.set_ticklabels(gas_list)
+        ax.xaxis.set_ticklabels(df.heure)   
+        ax.spines['bottom'].set_color('tab:gray')
+        ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()
     return fig
 
@@ -477,10 +484,12 @@ def plot_acidobas(df):
     None.
     """
     fig = plt.figure(figsize=(8, 4))
-    fig.suptitle('acidoBasique')
+    fig.suptitle('acidoBasique', color='tab:gray')
+
     ax1 = fig.add_subplot(211)
     ax1.plot(df.ph, '-o', color='tab:gray', ms=10)
     ax1.set_ylabel('pH')
+    ax1.axhspan(7.35, 7.45, alpha=0.3, color='tab:grey')
 
     ax2 = fig.add_subplot(212)
     ax2.plot(df.pco2, '-o', color='tab:blue', ms=10)
@@ -501,7 +510,10 @@ def plot_acidobas(df):
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(np.arange(len(df)))
+        # ax.xaxis.set_ticklabels(np.arange(len(df)))
+        ax.xaxis.set_ticklabels(df.heure)    
+        ax.spines['bottom'].set_color('tab:gray')
+        ax.tick_params(axis='x', colors='tab:gray')
     ax1.spines["right"].set_visible(False)
     fig.tight_layout()
     return fig
@@ -519,7 +531,7 @@ def plot_metabo(df):
     None.
     """
     fig = plt.figure(figsize=(8, 4))
-    fig.suptitle('métabo')
+    fig.suptitle('métabo', color='tab:gray')
     ax = fig.add_subplot(111)
     ax.plot(df.hco3, '-o', color='tab:orange', ms=10)
     ax.set_ylabel('$HCO_3$', color='tab:orange')
@@ -538,8 +550,10 @@ def plot_metabo(df):
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(np.arange(len(df)))
-
+        # ax.xaxis.set_ticklabels(np.arange(len(df)))
+        ax.xaxis.set_ticklabels(df.heure)
+        ax.spines['bottom'].set_color('tab:gray')
+        ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()
     return fig
 
@@ -557,7 +571,7 @@ def plot_iono(df):
 
     """
     fig = plt.figure(figsize=(8, 4))
-    fig.suptitle('iono')
+    fig.suptitle('iono', color='tab:gray')
     ax = fig.add_subplot(211)
     ax.plot(df.Na, '-o', color='tab:red', ms=10)
     # lims = ax.get_xlim()
@@ -599,7 +613,11 @@ def plot_iono(df):
     for ax in fig.get_axes():
         ax.spines['top'].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(np.arange(len(df)))
+        # ax.xaxis.set_ticklabels(np.arange(len(df)))
+        ax.xaxis.set_ticklabels(df.heure) 
+        ax.spines['bottom'].set_color('tab:gray')
+        ax.tick_params(axis='x', colors='tab:gray')
+
     fig.tight_layout()
     return fig
 
@@ -616,7 +634,7 @@ def plot_hb(df):
     None.
     """
     fig = plt.figure(figsize=(8, 4))
-    fig.suptitle('Hb')
+    fig.suptitle('Hb', color='tab:gray')
     ax = fig.add_subplot(111)
     ax.plot(df.hb, '-or', color='tab:red')
     ax.set_ylabel('Hb', color='tab:red')
@@ -625,7 +643,10 @@ def plot_hb(df):
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
     ax.xaxis.set_ticks(np.arange(len(df)))
-    ax.xaxis.set_ticklabels(np.arange(len(df)))
+    # ax.xaxis.set_ticklabels(np.arange(len(df)))
+    ax.xaxis.set_ticklabels(df.heure)
+    ax.spines['bottom'].set_color('tab:gray')
+    ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()
     return fig
 
