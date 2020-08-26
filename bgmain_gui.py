@@ -231,8 +231,13 @@ class SelectGas(QWidget):
         # Table to attributes (update self.attributes and gasValList)
         self.table_to_self(num)
         # self.attr to gasObj (build GasObg, and add to the gasesList)
-        newBgObj = bg.Gas(self.spec, self.hb, self.fio2, self.po2,
-                          self.ph, self.pco2, self.hco3, self.etco2)
+        dico = dict(spec=self.spec, hb=self.hb, fio2=self.fio2, 
+                    po2=self.po2, ph=self.ph, pco2=self.pco2, 
+                    hco3=self.hco3, etco2=self.etco2)
+        
+        newBgObj = bg.Gas(**dico)
+        # newBgObj = bg.Gas(self.spec, self.hb, self.fio2, self.po2,
+        #                   self.ph, self.pco2, self.hco3, self.etco2)
         self.gases.append(newBgObj)
 
         # add to the gasesV dicionary (of gasObj__dict__)

@@ -224,11 +224,12 @@ def plot_acidbas(gases, num, path, ident='', save=False, pyplot=False):
 
     if pyplot:
         # fig = plt.figure(figsize=(14, 8), frameon=True)
-        fig, axes = plt.subplots(figsize=(14, 8), frameon=True, nrows=3, ncols=1)
+        fig, axes = plt.subplots( nrows=3, ncols=1, figsize=(14, 8), frameon=True)
     else:
-        # fig = Figure(figsize=(14, 8), frameon=True)
-        fig, axes = Figure.subplots(figsize=(14, 8), frameon=True, nrows=3, ncols=1)
-
+        fig = Figure(figsize=(14, 8), frameon=True)
+        axes = []
+        for i in range(1,4):
+            axes.append(fig.add_subplot(3, 1, i))
     # fig.suptitle("acidobasique ($pH, \ Pa_{CO_2}, \ HCO_3^-$ )", fontsize=24,
     #              color='tab:gray')
     legs = [(r"$pH$", "k"), 
@@ -538,8 +539,10 @@ def plot_ventil(gases, num, path, ident='', save=False, pyplot=False):
         fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(14, 6))
         # fig = plt.figure(figsize=(14, 6))
     else:
-        fig = Figure(figsize=(14, 6))
-        fig, axes = Figure.subplots(nrows=2, ncols=1, figsize=(14, 6))
+        fig = Figure(figsize=(14, 8), frameon=True)
+        axes = []
+        for i in range(1,3):
+            axes.append(fig.add_subplot(3, 1, i))
     fig.suptitle('ventilation', color='tab:gray')
 
     for ax in axes:
