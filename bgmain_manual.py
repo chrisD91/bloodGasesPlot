@@ -13,17 +13,19 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import bgplot as bg
 
 # ------------------------------------------
 
-        
+
 # buiding the paths_b
 def build_path():
     """
-    build variable paths_b (Bunch class), 
+    build variable paths_b (Bunch class),
     attributes: locations (root, data, record, save, pict)
     """
     class Bunch(dict):
+        """ Bunch classical Bunch class """
         def __init__(self, **kwds):
             super().__init__(**kwds)
             self.__dict__ = self
@@ -51,7 +53,7 @@ def build_path():
         # folder = 'onDellRecorded'
         # folder = 'onPanaRecorded'
         folder = 'onPanelPcRecorded'
-        
+
         paths_bunch.record_ = records
         paths_bunch.data_ = os.path.join(records, 'anesthRecords', folder)
         paths_bunch.save_ = os.path.join(records, 'casClin', 'buildingCorner')
@@ -86,12 +88,11 @@ def append_blood_gases_path(paths_bunch):
     if mod_path not in sys.path:
         sys.path.append(mod_path)
         print('added', mod_path, ' to the path')
-        
+
 paths_b = build_path()
 append_anesth_plot_path(paths_b)
 append_blood_gases_path(paths_b)
 
-import bgplot as bg
 
 #%%
 # manual use:
@@ -115,12 +116,12 @@ def append_from_dico(dico, gaslist=None, gasvisu=None):
     if not gasvisu:
         gasvisu = {}
     if not dico:
-        dico = dict(spec='horse', hb=12, fio2=0.21, po2=95, 
-                ph=7.4, pco2=40, hco3=24, etco2=38)
+        dico = dict(spec='horse', hb=12, fio2=0.21, po2=95,
+                    ph=7.4, pco2=40, hco3=24, etco2=38)
 
-        # dico = {'spec': 'horse', 'hb': 12, 'fio2': 0.21, 'po2': 95, 
+        # dico = {'spec': 'horse', 'hb': 12, 'fio2': 0.21, 'po2': 95,
         #         'ph': 7.4, 'pco2': 40, 'hco3': 24, 'etco2': 38}
-        
+
     # key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
     # gas = bg.Gas(*[dico[item] for item in key_list])
     gas = bg.Gas(**dico)
@@ -184,8 +185,8 @@ def csv_to_df(filename):
             print(item, 'is missing in the file')
             return
     # change the NaN by default values
-    ref = {'spec': 'horse', 'hb': 12, 'fio2': 0.21, 'po2': 95, 
-                'ph': 7.4, 'pco2': 40, 'hco3': 24, 'etco2': 38}
+    ref = {'spec': 'horse', 'hb': 12, 'fio2': 0.21, 'po2': 95,
+           'ph': 7.4, 'pco2': 40, 'hco3': 24, 'etco2': 38}
     for col in df.columns:
         if col in ref.keys():
             if df[col].hasnans:
@@ -194,9 +195,9 @@ def csv_to_df(filename):
                 df[col] = df[col].fillna(ref.get(col))
     return df
 
-def df_append_to_gases(df, gas_list, gas_visu):
+def df_append_to_gases(df, gaslist, gasvisu):
     """
-    
+
 
     Parameters
     ----------
@@ -213,9 +214,9 @@ def df_append_to_gases(df, gas_list, gas_visu):
 
     """
     for i in range(len(df)):
-        append_from_dico(df.iloc[i].to_dict(), 
-                         gaslist=gas_list,  gasvisu=gas_visu)
-        
+        append_from_dico(df.iloc[i].to_dict(),
+                         gaslist=gaslist, gasvisu=gasvisu)
+
     return i
 
 #%%%%%%%%%%%%%% append values
@@ -242,11 +243,11 @@ if addgas:
     file = 'data/190621poly/doc/190621polyBg.csv'
     file = 'casClin/stabColic/doc/bg.csv'
     file_name = os.path.join(paths_b.record_, file)
-    
+
     in_df = csv_to_df(file_name)
     for i in range(len(in_df)):
-        append_from_dico(in_df.iloc[i].to_dict(), 
-                         gaslist=gas_list,  gasvisu=gas_visu)
+        append_from_dico(in_df.iloc[i].to_dict(),
+                         gaslist=gas_list, gasvisu=gas_visu)
 
 #%% h5 file
 addgas = False
@@ -256,15 +257,15 @@ if addgas:
 
     in_df = pd.read_hdf(os.path.join(paths_b.airline_, 'bg20_08_16.h5'))
     for i in range(len(in_df)):
-        append_from_dico(in_df.iloc[i].to_dict(), 
-                         gaslist=gas_list,  gasvisu=gas_visu)
-save=False
+        append_from_dico(in_df.iloc[i].to_dict(),
+                         gaslist=gas_list, gasvisu=gas_visu)
+save = False
 if save:
-    filename = os.path.join(paths_b.record_, 'anesthRecords', 'bloodGases', 
+    filename = os.path.join(paths_b.record_, 'anesthRecords', 'bloodGases',
                             'bg200816_airline.xlsx')
     in_df.to_excel(filename)
-    
-    
+
+
 #%% #%% to plot all the graphs
 # (NB pyplot = True return a pyplot, False return a matplotnib Figure Obj)
 
@@ -281,7 +282,7 @@ def plot_figs(gases, **kwargs):
         'reverse' (True) : order of the plotting
         'save' (False)
         'ident' () : added to the name of the plot for reuse
-        'pyplot' (True) pyplot or matplotlib.Figure 
+        'pyplot' (True) pyplot or matplotlib.Figure
         'path' ('~/test') : to save
         'folder' ('fig') : added to the save path
     Returns
@@ -390,7 +391,7 @@ def print_beamer_include(folder, figlist):
 #folder = 'bg/'    # location in the beamer folder
 
 varDico = {'key':'clin',
-           'num':1,             # gas number (0 = ref, first=1)
+           'num':1,            # gas number (0 = ref, first=1)
            #num = len(gases) - 1
            'reverse': False,
            'save'    :False,
@@ -447,7 +448,7 @@ def plot_evol_o2co2(df):
     ax.tick_params(axis='y', colors='tab:red')
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
-    
+
     axT = ax.twinx()
     axT.plot(df.pco2, '-o', color='tab:blue', ms=10)
     axT.set_ylabel('$Pa C0_2$', color='tab:blue')
@@ -480,7 +481,7 @@ def plot_acidobas(df):
     ax1 = fig.add_subplot(211)
     ax1.plot(df.ph, '-o', color='tab:gray', ms=10)
     ax1.set_ylabel('pH')
-    
+
     ax2 = fig.add_subplot(212)
     ax2.plot(df.pco2, '-o', color='tab:blue', ms=10)
     ax2.set_ylabel('$Pa CO_2$', color='tab:blue')
@@ -488,7 +489,7 @@ def plot_acidobas(df):
     ax2.tick_params(axis='y', colors='tab:blue')
     for spine in ['top', 'right']:
         ax2.spines[spine].set_visible(False)
-    
+
     ax3 = ax2.twinx()
     ax3.plot(df.hco3, '-o', color='tab:orange', ms=10)
     ax3.set_ylabel('$HCO_3$', color='tab:orange')
@@ -629,8 +630,8 @@ def plot_hb(df):
     return fig
 
 #%%
-plotEvol = False 
-if plotEvol:
+plot_evol = False
+if plot_evol:
     plot_evol_o2co2(in_df)
     plot_acidobas(in_df)
     plot_metabo(in_df)

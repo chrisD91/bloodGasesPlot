@@ -223,53 +223,65 @@ def plot_acidbas(gases, num, path, ident='', save=False, pyplot=False):
     hco3 = gas.hco3
 
     if pyplot:
-        fig = plt.figure(figsize=(14, 8), frameon=True)
+        # fig = plt.figure(figsize=(14, 8), frameon=True)
+        fig, axes = plt.subplots(figsize=(14, 8), frameon=True, nrows=3, ncols=1)
     else:
-        fig = Figure(figsize=(14, 8), frameon=True)
+        # fig = Figure(figsize=(14, 8), frameon=True)
+        fig, axes = Figure.subplots(figsize=(14, 8), frameon=True, nrows=3, ncols=1)
 
     # fig.suptitle("acidobasique ($pH, \ Pa_{CO_2}, \ HCO_3^-$ )", fontsize=24,
     #              color='tab:gray')
-
-    ax = fig.add_subplot(311)
-    ax.set_title('acide ---------------------------------------------------------------------------- alcalin',
+    legs = [(r"$pH$", "k"), 
+            (r"$P_{CO_2}$", "tab:blue"), 
+            (r"$HCO_3^-$","tab:orange")]
+    for ax, leg in zip(axes, legs):
+        ax.axhline(0, color='tab:gray')
+        ax.text(0.05, 0.5, leg[0], fontsize=22, color=leg[1], 
+            horizontalalignment='left', verticalalignment='center', 
+            transform=ax.transAxes, backgroundcolor='w')
+ 
+    fig.suptitle('acide ---------------------------------------------------------------------------- alcalin',
                  color='tab:gray')
+    ax = axes[0]
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    ax.plot(phRange, [0, 0], label='line 1', linewidth=5, color="tab:gray")
-    ax.plot([ph], [0], 'v-', color='tab:red', markersize=32, alpha=.7)                            #pH
+    ax.plot(phRange, [0, 0], label='line 1', linewidth=5, color="tab:gray",
+            marker='d', markersize=10)
+    ax.plot([ph], [0], 'v-', color='tab:red', markersize=32,
+            markeredgecolor='k')
     phmin, phmax = 7.3, 7.5
     if ph >= 7.5:
         phmax = ph + 0.1
     if ph <= 7.3:
         phmin = ph - 0.1
     ax.set_xlim([phmin, phmax])
-    ax.text(7.32, 0, r"$pH$", fontsize=32, color="tab:gray")
-    ax = fig.add_subplot(312)
+
+    ax = axes[1]
     co2min, co2max = 25, 55
     if pco2 >= co2max:
         co2max = pco2 + 5
     if pco2 <= co2min:
         co2min = pco2 -5
     ax.plot([35, 45], [0, 0], label='line 1', linewidth=5, color='tab:blue', 
-            alpha=0.8)
-    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32, alpha=.7)                     # pco2
+            alpha=0.8, marker='d', markersize=10)
+    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32, 
+            markeredgecolor='k')
     ax.set_xlim([co2max, co2min])
-    ax.text(48, 0, r"$P_{CO_2}$", fontsize=22, color="tab:blue")
-    ax = fig.add_subplot(313)
+
+    ax = axes[2]
     hco3min, hco3max = 15, 35
     if hco3 >= hco3max:
         hco3max = hco3 + 5
     if hco3 <= hco3min:
         hco3min = hco3 - 5
-    ax.plot([20, 30], [0, 0], label='line 1', linewidth=5, color='tab:orange')
-    ax.plot([hco3], [0], 'v-', color='tab:red', markersize=32, alpha=.7)                        # HCO3-
+    ax.plot([20, 30], [0, 0], label='line 1', linewidth=5, color='tab:orange',
+            marker='d', markersize=10)
+    ax.plot([hco3], [0], 'v-', color='tab:red', markersize=32,
+            markeredgecolor='k')
     ax.set_xlim([hco3min, hco3max])
-    ax.text(16, 0, r"$HCO_3^-$", fontsize=22, color="tab:orange")
-    for ax in fig.get_axes():
+    for ax in axes:
         ax.get_yaxis().set_visible(False)
-        ax.get_xaxis().tick_bottom()
-        ax.grid(alpha=0.7)
         ax.tick_params(colors='tab:grey')
-        for spine in ['left', 'top', 'right']:
+        for spine in ['left', 'top', 'right', 'bottom']:
             ax.spines[spine].set_visible(False)
     if pyplot:
         if save:
@@ -414,14 +426,14 @@ def morpion(gases, num, path, ident='', save=False, pyplot=False):
 
     """
     gas = gases[num-1]
-    title = 'ph='+ str(gas.ph) + '    pco2=' + str(gas.pco2) + '    hco3=' + str(gas.hco3)
+    title = 'pH='+ str(gas.ph) + r'    pco2=' + str(gas.pco2) + '    hco3=' + str(gas.hco3)
     data = []
     data.append(phline(gas.ph))
     data.append(co2line(gas.pco2))
     data.append(hco3line(gas.hco3))
 
     cols = ("acide", "norm", "alcalin")
-    rows = ("pH", "PCO2", "HCO3-")
+    rows = (r"$pH$", r"$P_{CO_2}$", r"$HCO_3^-$")
     if pyplot:
         fig = plt.figure(figsize=(14, 5))
     else:
@@ -434,7 +446,8 @@ def morpion(gases, num, path, ident='', save=False, pyplot=False):
     table = ax.table(cellText=data,
                      rowLabels=rows, colLabels=cols,
                      loc='upper center', cellLoc='center',
-                     rowLoc='center')
+                     rowLoc='center',
+                     colWidths=[.15, .15, .15])
     table.auto_set_font_size(False)
     table.scale(1, 5)
 #    #fig.set.tight_layout(True)
@@ -471,26 +484,26 @@ def plot_o2(gases, num, path, ident='', save=False, pyplot=False):
         fig = plt.figure(figsize=(14, 3))
     else:
         fig = Figure(figsize=(14, 3))
-    fig.suptitle("oxygénation : $Pa_{O_2}$ ", fontsize=24, backgroundcolor='w',
-                 color='tab:gray')
+    # fig.suptitle("oxygénation : $Pa_{O_2}$ ", fontsize=24, backgroundcolor='w',
+    #              color='tab:gray')
     ax = fig.add_subplot(111)
-#    ax = fig.add_axes([0.1, 0.15, 0.8, 0.7])
-#    ax.spines["top"].set_visible(False)
-#    ax.spines["right"].set_visible(False)
-#    ax.spines["left"].set_visible(False)
-    ax.get_xaxis().tick_bottom()
-    ax.plot([90, 100], [0, 0], label='line 1', linewidth=3, color='tab:gray')
-    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32, alpha=0.8)
+    ax.axhline(0, color='tab:gray')
+    ax.plot([90, 100], [0, 0], label='line 1', linewidth=5, color='tab:green',
+            marker='d', markersize=10, )
+    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32, 
+            markeredgecolor='k')
     if po2 < 120:
         ax.set_xlim([po2 - 20, 120])
     else:
         ax.set_xlim([70, po2 + 20])
-    ax.text(80, 0, r"$P_{O_2}$", fontsize=22, color="tab:blue")
-    for spine in ['top', 'right', 'left']:
+    ax.text(0.05, 0.5, r"$P_{O_2}$", fontsize=32, color="tab:green", 
+            horizontalalignment='left', verticalalignment='center', 
+            transform=ax.transAxes, backgroundcolor='w')
+    for spine in ['top', 'right', 'left', 'bottom']:
         ax.spines[spine].set_visible(False)
     ax.get_yaxis().set_visible(False)
     ax.get_xaxis().set_visible(True)
-    ax.grid()
+    # ax.grid()
     ax.axes.tick_params(colors='tab:gray')
     #fig.set.tight_layout(True)
     if pyplot:
@@ -499,7 +512,6 @@ def plot_o2(gases, num, path, ident='', save=False, pyplot=False):
             name = os.path.join(path, (str(ident)+'O2'))
             name = os.path.expanduser(name)
             saveGraph(name, ext='png', close=True, verbose=True)
-#    else:
     return fig
 
 #------------------------------------
@@ -523,37 +535,51 @@ def plot_ventil(gases, num, path, ident='', save=False, pyplot=False):
     pco2 = gas.pco2
 
     if pyplot:
-        fig = plt.figure(figsize=(14, 6))
+        fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(14, 6))
+        # fig = plt.figure(figsize=(14, 6))
     else:
         fig = Figure(figsize=(14, 6))
-    fig.suptitle("ventilation : $Pa_{O_2}\ et\ Pa_{CO_2}$ ", fontsize=24,
-                  backgroundcolor='w', color='tab:grey')
-    ax = fig.add_subplot(212)
-    ax.plot([pco2], [0], 'o-', color='tab:red', markersize=22)                     # pco2
-    ax.plot([35, 45], [0, 0], label='line 1', linewidth=3)
+        fig, axes = Figure.subplots(nrows=2, ncols=1, figsize=(14, 6))
+    fig.suptitle('ventilation', color='tab:gray')
+
+    for ax in axes:
+        ax.axhline(0, color='tab:gray')
+
+    ax = axes[0]
+    ax.plot([90, 100], [0, 0], label='line 1', linewidth=3,
+            marker='d', markersize=10, color='tab:green')
+    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32, 
+            markeredgecolor='k')                     # po2
+    if po2 < 120:
+        ax.set_xlim([po2-20, 120])
+    else:
+        ax.set_xlim([70, po2+20])
+    ax.text(0.05, 0.5, r"$P_{O_2}$", fontsize=32, color="tab:green", 
+            horizontalalignment='left', verticalalignment='center', 
+            transform=ax.transAxes, backgroundcolor='w')
+            
+    ax = axes[1]
+    ax.plot([35, 45], [0, 0], label='line 1', linewidth=3, 
+            marker='d', markersize=10)
+    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32, 
+            markeredgecolor='k')                     # pco2
     co2min, co2max = 25, 55
     if pco2 >= co2max:
         co2max = pco2 + 5
     if pco2 <= co2min:
         co2min = pco2 -5
     ax.set_xlim([co2min, co2max])
-    ax.text(48, 0, r"$P_{CO_2}$", fontsize=22, color="tab:blue")
+    ax.text(0.05, 0.5, r"$P_{CO_2}$", fontsize=32, color="tab:blue", 
+            horizontalalignment='left', verticalalignment='center', 
+            transform=ax.transAxes, backgroundcolor='w')
 
-    ax = fig.add_subplot(211)
-    ax.plot([po2], [0], 'o-', color='tab:red', markersize=22)                     # po2
-    ax.plot([90, 100], [0, 0], label='line 1', linewidth=3)
-    if po2 < 120:
-        ax.set_xlim([po2-20, 120])
-    else:
-        ax.set_xlim([70, po2+20])
-    ax.text(80, 0, r"$P_{O_2}$", fontsize=22, color='tab:green')
-    for ax in fig.get_axes():
+    for ax in axes:
         ax.axes.tick_params(colors='tab:gray')
-        ax.grid()
+        # ax.grid()
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().set_visible(False)
         ax.get_xaxis().set_visible(True)
-        for spine in ['left', 'top', 'right']:
+        for spine in ['left', 'top', 'right', 'bottom']:
             ax.spines[spine].set_visible(False)
     ##fig.set.tight_layout(True)
     if pyplot:
@@ -672,10 +698,9 @@ def plot_cascO2(gases, nums, path, ident='', save=False, pyplot=False):
                edgecolor='w', linewidth=1)
     ax.set_title('cascade de l\' oxygène', color='tab:gray')
     ax.set_ylabel('pression partielle (mmHg)', color='tab:gray')
-    ax.axhline(y=95, xmin=0.75, linewidth=4, alpha=0.9, color='tab:red')
-    ax.axhline(y=40, xmin=0.75, linewidth=4, alpha=0.9, color='tab:blue')
-    ax.axhline(y=160, xmin=0.01, xmax=0.25, linewidth=4, alpha=0.9, 
-               color='tab:grey')
+    ax.axhline(y=95, xmin=0.75, linewidth=2, alpha=1, color='red')
+    ax.axhline(y=40, xmin=0.75, linewidth=2, alpha=1, color='blue')
+    ax.axhline(y=159, xmin=0.01, xmax=0.25, linewidth=2, alpha=1, color='g')
 
     ax.set_xticks(ind + width)
     ax.set_xticklabels(('insp', 'aérien', 'alvéolaire', 'artériel'))
@@ -713,7 +738,6 @@ def plot_cascO2Lin(gases, nums, path, ident='', save=False, pyplot=False):
         pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
     output : histogram plot (pyplot or FigureObj)
     """
-#    print('num = ', nums)
     values = []
     if len(gases) > 1:
         for num in nums:
@@ -741,8 +765,9 @@ def plot_cascO2Lin(gases, nums, path, ident='', save=False, pyplot=False):
                 alpha=0.8)
     ax.set_title('cascade de l\' oxygène', alpha=0.5)
     ax.set_ylabel('pression partielle (mmHg)', alpha=0.5)
-    ax.axhline(y=95, xmin=0.75, linewidth=4, alpha=0.5, color='tab:red')
-    ax.axhline(y=40, xmin=0.75, linewidth=4, alpha=0.5, color='tab:blue')
+    ax.axhline(y=95, xmin=0.9, linewidth=2, alpha=1, color='red')
+    ax.axhline(y=40, xmin=0.9, linewidth=2, alpha=1, color='blue')
+    ax.axhline(y=159, xmin=0.02, xmax=0.10, linewidth=2, alpha=1, color='g')
     #ax.set_xlabel
     ax.set_xticks(range(len(val)))
     ax.set_xticklabels(('insp', 'aérien', 'alvéolaire', 'artériel'))
@@ -791,22 +816,21 @@ def plot_GAa(gases, num, path, ident='', save=False, pyplot=False):
     else:
         fig = Figure(figsize=(14, 3))
     ax = fig.add_subplot(111)
-    ax.get_xaxis().tick_bottom()
-    #ax.get_yaxis().tick_left()
-    ax.plot([10, 15], [0, 0], label='line 1', linewidth=5, color='tab:blue')
+    ax.axhline(0, color='tab:gray')
+    ax.plot([5, 15], [0, 0], label='line 1', linewidth=5, color='tab:blue',
+            marker='d', markersize=10)
     ax.plot([gAa], [0], 'v-', color='tab:red', markersize=32, alpha=.8)             # GAa
     st = 'gradient alvéolo-artériel ($Palv_{O_2} - Pa_{O_2}$) '
-    ax.set_title(st, backgroundcolor='w')
-    ax.spines["left"].set_visible(False)
+    ax.set_title(st, backgroundcolor='w', color='tab:grey')
     ax.get_yaxis().set_visible(False)
     print('plot_GAa : ', casc[-2] - casc[-1], gAa)
     if gAa > 25:
         ax.set_xlim([0, gAa+10])
     else:
         ax.set_xlim([0, 30])
-    for dpine in ['left', 'top', 'right']:
-        ax.spines[loca].set_visible(False)
-    ax.grid()
+    for spine in ['left', 'top', 'right', 'bottom']:
+        ax.spines[spine].set_visible(False)
+#    ax.grid()
     ax.axes.tick_params(colors='tab:gray')
     #fig.set.tight_layout(True)
     if pyplot:
@@ -818,7 +842,7 @@ def plot_GAa(gases, num, path, ident='', save=False, pyplot=False):
     return fig
 
 #------------------------------------
-def plot_ratio(gases, num, savePath, ident='', save=False, pyplot=False):
+def plot_ratio(gases, num, savepath, ident='', save=False, pyplot=False):
     """
     plot ratio O2insp / PaO2
     input :
@@ -842,33 +866,40 @@ def plot_ratio(gases, num, savePath, ident='', save=False, pyplot=False):
     else:
         fig = Figure(figsize=(14, 3))
     ax = fig.add_subplot(111)
-    ax.plot([100, 200], [0, 0], 'tab:red', label='line 1', linewidth=2)
-    ax.plot([200, 300], [0, 0], 'tab:red', label='line 1', linewidth=4)
-    ax.plot([300, 500], [0, 0], 'tab:blue', label='line 1', linewidth=6)
-    ax.plot([ratio], [0], 'rv-', markersize=32)                    # ratio
-    st = r'ratio $Pa_{O_2} / Fi_{O_2}$'
+    ax.axhline(0, color='tab:grey')
+    ax.plot([100, 200], [0, 0], 'tab:red', label='line 1', linewidth=2,
+            marker='d', markersize=10)
+    ax.plot([200, 300], [0, 0], 'tab:orange', label='line 1', linewidth=4,
+            marker='d', markersize=10)
+    ax.plot([300, 500], [0, 0], 'tab:blue', label='line 1', linewidth=6,
+            marker='d', markersize=10)
+    ax.plot([ratio], [0], 'rv-', markersize=32, markeredgecolor='k')                    # ratio
+    st = r'ratio $Pa_{O_2}\ /\ Fi_{O_2}$'
     ax.set_title(st, backgroundcolor='w', color='tab:gray')
     ax.yaxis.set_visible(False)
-    ax.plot(300, 0, 'tab:blue', label='line 1', linewidth=1)
+#    ax.plot(300, 0, 'tab:blue', label='line 1', linewidth=1)
 
-    ax.text(150, 0.01, r"$ALI$", fontsize=16, color="tab:red")
-    ax.text(250, 0.01, r"$SDRA$", fontsize=16, color="tab:red")
-    ax.text(400, 0.01, r"$norme$", fontsize=24, color="tab:blue")
-    ax.grid()
+    ax.text(150, -0.025, r"ALI", fontsize=18, color="tab:red",
+            horizontalalignment='center')
+    ax.text(250, -0.025, r"ARDS", fontsize=18, color="tab:orange",
+            horizontalalignment='center')
+    ax.text(400, -0.025, r"norme", fontsize=18, color="tab:blue",
+            horizontalalignment='center')
+    # ax.grid()
     ax.axes.tick_params(colors='tab:gray')
-    for spine in ['left', 'top', 'right']:
+    for spine in ['left', 'top', 'right', 'bottom']:
         ax.spines[spine].set_visible(False)
     #fig.set.tight_layout(True)
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(savePath, (str(ident)+'ratio'))
+            name = os.path.join(savepath, (str(ident)+'ratio'))
             name = os.path.expanduser(name)
             saveGraph(name, ext='png', close=True, verbose=True)
     return fig
 
 #------------------------------------
-def plot_GAaRatio(gases, num, savePath, ident='', save=False, pyplot=False):
+def plot_GAaRatio(gases, num, savepath, ident='', save=False, pyplot=False):
     """
     plot alveolo-arterial gradiant
     input :
@@ -894,8 +925,11 @@ def plot_GAaRatio(gases, num, savePath, ident='', save=False, pyplot=False):
         fig = Figure(figsize=(14, 6))
 #    fig.suptitle("quantification du passage alvéolo-capillaire")
     ax = fig.add_subplot(211)
-    ax.plot([10, 15], [0, 0], label='line 1', linewidth=4, color='tab:blue')
-    ax.plot([gAa], [0], 'v-', color='tab:red', markersize=32)             # GAa
+    ax.axhline(0, color='tab:grey')
+    ax.plot([5, 15], [0, 0], label='line 1', linewidth=4, color='tab:blue',
+            marker='d', markersize=10)
+    ax.plot([gAa], [0], 'v-', color='tab:red', markersize=32,
+            markeredgecolor='k')             # GAa
     st = 'gradient alvéolo-artériel ($PA_{O_2} - Pa_{O_2}$)'
     ax.set_title(st, y=.8, backgroundcolor='w', color='tab:gray')
     print('gAa=', gAa)
@@ -905,33 +939,40 @@ def plot_GAaRatio(gases, num, savePath, ident='', save=False, pyplot=False):
         ax.set_xlim([0, 30])
 
     ax = fig.add_subplot(212)
-    ax.plot([100, 200], [0, 0], 'tab:red', label='line 1', linewidth=2)
-    ax.plot([200, 300], [0, 0], 'tab:red', label='line 1', linewidth=4)
-    ax.plot([300, 500], [0, 0], 'tab:blue', label='line 1', linewidth=6)
-    ax.plot([ratio], [0], 'rv-', markersize=32, alpha=.8)                    # ratio
+    ax.axhline(0, color='tab:grey')
+    ax.plot([100, 200], [0, 0], 'tab:red', label='line 1', linewidth=2,
+            marker='d', markersize=10)
+    ax.plot([200, 300], [0, 0], 'tab:orange', label='line 1', linewidth=4,
+            marker='d', markersize=10)
+    ax.plot([300, 500], [0, 0], 'tab:blue', label='line 1', linewidth=6,
+            marker='d', markersize=10)
+    ax.plot([ratio], [0], 'rv-', markersize=32, markeredgecolor='k')                    # ratio
     st = 'ratio $ Pa_{O_2} / Fi_{O_2}$'
     ax.set_title(st, y=.8, backgroundcolor='w', color='tab:gray')
     ax.plot(300, 0, 'tab:blue', label='line 1', linewidth=1)
-    ax.text(150, 0.01, r"$ALI$", fontsize=16, color="tab:red")
-    ax.text(250, 0.01, r"$SDRA$", fontsize=16, color="tab:red")
-    ax.text(400, 0.01, r"$norme$", fontsize=22, color="tab:blue")
+    ax.text(150, -0.025, r"ALI", fontsize=18, color="tab:red",
+            horizontalalignment='center')
+    ax.text(250, -0.025, r"ARDS", fontsize=18, color="tab:orange",
+            horizontalalignment='center')
+    ax.text(400, -0.025, r"norme", fontsize=18, color="tab:blue",
+            horizontalalignment='center')
     for ax in fig.get_axes():
         ax.axes.tick_params(colors='tab:gray')
         ax.get_yaxis().set_visible(False)
-        ax.grid(True)
-        for spine in ['left', 'top', 'right']:
+        # ax.grid(True)
+        for spine in ['left', 'top', 'right', 'bottom']:
             ax.spines[spine].set_visible(False)
     #fig.set.tight_layout(True)
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(savePath, (str(ident)+'GAaRatio'))
+            name = os.path.join(savepath, (str(ident)+'GAaRatio'))
             name = os.path.expanduser(name)
             saveGraph(name, ext='png', close=True, verbose=True)
     return fig
 
 #------------------------------------
-def plot_RatioVsFio2(mes, savePath, ident='', save=False, pyplot=False):
+def plot_RatioVsFio2(mes, savepath, ident='', save=False, pyplot=False):
     """
     plot ratio vs FIO2
     input :
@@ -980,7 +1021,7 @@ def plot_RatioVsFio2(mes, savePath, ident='', save=False, pyplot=False):
         ###fig.set.tight_layout(True)
         plt.show()
         if save:
-            name = os.path.join(savePath, (str(ident)+'ratioVsFio2'))
+            name = os.path.join(savepath, (str(ident)+'ratioVsFio2'))
             name = os.path.expanduser(name)
             saveGraph(name, ext='png', close=True, verbose=True)
     else:
@@ -1040,7 +1081,7 @@ def plot_satHb(gases, num, path, ident='', save=False, pyplot=False):
     ax.set_ylabel('satHb (%)', color='tab:grey')
     ax.set_xlabel(r'$P_{O_2}$ (mmHg)', color='tab:gray')
     ax.set_ylim([0, 110])
-    ax.grid()
+    # ax.grid()
     ax.axes.tick_params(colors='tab:gray')
     lims = ax.get_ylim()
     ax.set_ylim(0, lims[1])
@@ -1102,11 +1143,11 @@ def plot_CaO2(gases, num, path, ident='', save=False, pyplot=False):
     ax.text(50, 2500, eq, backgroundcolor='w', color='tab:grey')
     ax.plot(O2Range, caO2(species, hb, O2Range), linewidth=2)             #ref
     ax.plot(O2Range, 0.003*O2Range)
-    ax.plot(paO2, contO2, 'o-', color='tab:red', markersize=32, alpha=0.8)
+    ax.plot(paO2, contO2, 'o-', color='tab:red', markersize=22, alpha=0.8)
     ax.set_ylabel(r'$Ca_{O_2}\ (ml/l)$', color='tab:gray')
     ax.set_xlabel(r'$P_{O_2}$', color='tab:gray')
     #ax.set_xlim([10, 200])
-    ax.grid()
+    #ax.grid()
     ax.axes.tick_params(colors='tab:gray')
     lims = ax.get_ylim()
     ax.set_ylim(0, lims[1])
@@ -1163,24 +1204,24 @@ def plot_varCaO2(gases, num, path, ident='', save=False, pyplot=False):
     ax1.plot(O2Range, satHbO2(species, O2Range), linewidth=2, color='tab:blue')        # mesure
     ax1.plot([paO2, paO2], [0, sat], 'tab:gray', linewidth=1)
     ax1.plot([0, paO2], [sat, sat], 'tab:gray', linewidth=1)
-    ax1.plot(paO2, sat, 'o-', color='tab:red', markersize=22, alpha=.8)
+    ax1.plot(paO2, sat, 'o-', color='tab:red', markersize=22, alpha=.7)
     ax1.set_ylabel('satHb (%)', color='tab:blue')
     ax1.set_xlabel(r'$P_{O_2}$', color='tab:gray')
-    ax1.set_ylim(0, 110)
+    ax1.set_ylim(0, 100)
 
     ax2 = ax1.twinx()
     ax2.get_yaxis().tick_right()
     ax2.plot(O2Range, ((caO2(species, hb, O2Range+1)- caO2(species, hb, O2Range))), 
              color='tab:green')
     ax2.plot(paO2, caO2(species, hb, paO2+1)- caO2(species, hb, paO2), 'o-', 
-             color='tab:red', markersize=22)
+             color='tab:red', markersize=22, alpha=.7)
     for tl in ax2.get_yticklabels():
         tl.set_color('tab:green')
     ax2.set_ylabel('variation de CaO2 par variation de PO2', color=('tab:green'))
 #    ax2.set_xlabel(r'$P_{O_2}$')
     for ax in fig.get_axes():
         ax.axes.tick_params(colors='tab:gray')
-        ax.grid()
+       # ax.grid()
         for spine in ['left', 'top', 'right']:
             ax.spines[spine].set_visible(False)
     #fig.set.tight_layout(True)
@@ -1231,15 +1272,15 @@ def plot_hbEffect(gases, num, path, ident='', save=False, pyplot=False):
     ax.plot([100, 100], [0, 3000], 'tab:red', linewidth=8, alpha=0.5)
     ax.plot([40, 40], [0, 3000], color="tab:blue", linewidth=26, alpha=0.5)
     for nHb in range(5, 20, 2):
-        ax.plot(O2Range, caO2(species, nHb, O2Range))
+        ax.plot(O2Range, caO2(species, nHb, O2Range), alpha=.9)
     ax.plot([0, paO2], [contO2, contO2], 'tab:gray', linewidth=1)
     ax.plot([paO2, paO2], [0, contO2], 'tab:gray', linewidth=1)
-    ax.plot(paO2, contO2, 'o-', color='tab:red', markersize=22)
+    ax.plot(paO2, contO2, 'o-', color='tab:red', markersize=22, alpha=0.8)
     ax.set_ylabel(r'$Ca_{O_2} (ml/l)$', color='tab:gray')
     ax.set_xlabel('$P_{O_2} \ (mmHg)$', color='tab:gray')
     ax.axes.tick_params(colors='tab:gray')
     ax.set_xlim([10, O2max])
-    ax.grid()
+    # ax.grid()
     lims = ax.get_ylim()
     ax.set_ylim(0, lims[1])
     #fig.set.tight_layout(True)
@@ -1252,7 +1293,7 @@ def plot_hbEffect(gases, num, path, ident='', save=False, pyplot=False):
     return fig
 
 #--------------------------------------
-def plot_satHorseDog(savePath, ident='', save=False, pyplot=False):
+def plot_satHorseDog(savepath, ident='', save=False, pyplot=False):
     """
     plot satHb horse and dog
     input : none
@@ -1270,7 +1311,7 @@ def plot_satHorseDog(savePath, ident='', save=False, pyplot=False):
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
-    ax.grid()
+    # ax.grid()
     ax.plot(PO2, satHbO2('horse', PO2), label='Horse', linewidth=2)
     ax.plot(PO2, satHbO2('dog', PO2), label='Dog', linewidth=2)
     ax.plot([100, 100], [0, 100], color="tab:red", linewidth=10, alpha=0.5)
@@ -1285,7 +1326,7 @@ def plot_satHorseDog(savePath, ident='', save=False, pyplot=False):
         ##fig.set.tight_layout(True)
         plt.show()
         if save:
-            name = os.path.join(savePath, (str(ident)+'satHorseDog'))
+            name = os.path.join(savepath, (str(ident)+'satHorseDog'))
             name = os.path.expanduser(name)
             saveGraph(name, ext='png', close=True, verbose=True)
     else:
