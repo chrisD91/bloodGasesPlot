@@ -69,8 +69,8 @@ class SelectGas(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setFixedWidth(self.width)
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
-        self.setSizePolicy(sizePolicy)
+        #sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        #self.setSizePolicy(sizePolicy)
         self.show()
 
     def create_ButtonsGrid(self):
@@ -431,10 +431,12 @@ class Qt5MplCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         # set the parent widget
         self.setParent(parent)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Preferred, 
+                                   QSizePolicy.Preferred)
         # we define the widget as expandable
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
+        # FigureCanvas.setSizePolicy(self,
+        #                            QSizePolicy.Expanding,
+        #                            QSizePolicy.Expanding)
         # notify the system of updated policy
         FigureCanvas.updateGeometry(self)
 
@@ -442,6 +444,8 @@ class Qt5MplCanvas(FigureCanvas):
         #print('f = redraw')
         self.fig = fig
         FigureCanvas.__init__(self, self.fig)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Preferred, 
+                                   QSizePolicy.Preferred)
         # self.setParent(parent)
        # FigureCanvas.setSizePolicy(self,
        #                            QSizePolicy.Expanding,
@@ -704,6 +708,7 @@ class ApplicationWindow(QMainWindow):
                 bg.plot_GAaRatio(gases, num, path, ident, save, pyplot)
             if name == 'ratio':
                 bg.plot_ratio(gases, num, path, ident, save, pyplot)
+
 
     def select_plots(self, name, gases, num, path, ident, save, pyplot):
         """ select the plots to be build """
