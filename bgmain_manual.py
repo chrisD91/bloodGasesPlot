@@ -13,7 +13,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import bgplot as bg
+from bloodGases import bgplot as bg
 
 # ------------------------------------------
 
@@ -90,8 +90,8 @@ def append_blood_gases_path(paths_bunch):
         print('added', mod_path, ' to the path')
 
 paths_b = build_path()
-append_anesth_plot_path(paths_b)
-append_blood_gases_path(paths_b)
+#append_anesth_plot_path(paths_b)
+#append_blood_gases_path(paths_b)
 
 
 #%%
@@ -465,7 +465,7 @@ def plot_evol_o2co2(df):
         ax.spines["top"].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
         # ax.xaxis.set_ticklabels(gas_list)
-        ax.xaxis.set_ticklabels(df.heure)   
+        ax.xaxis.set_ticklabels(df.heure)
         ax.spines['bottom'].set_color('tab:gray')
         ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()
@@ -511,7 +511,7 @@ def plot_acidobas(df):
         ax.spines["top"].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
         # ax.xaxis.set_ticklabels(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(df.heure)    
+        ax.xaxis.set_ticklabels(df.heure)
         ax.spines['bottom'].set_color('tab:gray')
         ax.tick_params(axis='x', colors='tab:gray')
     ax1.spines["right"].set_visible(False)
@@ -614,7 +614,7 @@ def plot_iono(df):
         ax.spines['top'].set_visible(False)
         ax.xaxis.set_ticks(np.arange(len(df)))
         # ax.xaxis.set_ticklabels(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(df.heure) 
+        ax.xaxis.set_ticklabels(df.heure)
         ax.spines['bottom'].set_color('tab:gray')
         ax.tick_params(axis='x', colors='tab:gray')
 

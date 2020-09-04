@@ -7,7 +7,7 @@ a pyQt module to plot arterial blood gases
 """
 import sys
 import copy
-import bgplot as bg
+from bloodGases import bgplot as bg
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
@@ -231,10 +231,10 @@ class SelectGas(QWidget):
         # Table to attributes (update self.attributes and gasValList)
         self.table_to_self(num)
         # self.attr to gasObj (build GasObg, and add to the gasesList)
-        dico = dict(spec=self.spec, hb=self.hb, fio2=self.fio2, 
-                    po2=self.po2, ph=self.ph, pco2=self.pco2, 
+        dico = dict(spec=self.spec, hb=self.hb, fio2=self.fio2,
+                    po2=self.po2, ph=self.ph, pco2=self.pco2,
                     hco3=self.hco3, etco2=self.etco2)
-        
+
         newBgObj = bg.Gas(**dico)
         # newBgObj = bg.Gas(self.spec, self.hb, self.fio2, self.po2,
         #                   self.ph, self.pco2, self.hco3, self.etco2)
@@ -431,7 +431,7 @@ class Qt5MplCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         # set the parent widget
         self.setParent(parent)
-        FigureCanvas.setSizePolicy(self, QSizePolicy.Preferred, 
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Preferred,
                                    QSizePolicy.Preferred)
         # we define the widget as expandable
         # FigureCanvas.setSizePolicy(self,
@@ -444,7 +444,7 @@ class Qt5MplCanvas(FigureCanvas):
         #print('f = redraw')
         self.fig = fig
         FigureCanvas.__init__(self, self.fig)
-        FigureCanvas.setSizePolicy(self, QSizePolicy.Preferred, 
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Preferred,
                                    QSizePolicy.Preferred)
         # self.setParent(parent)
        # FigureCanvas.setSizePolicy(self,
