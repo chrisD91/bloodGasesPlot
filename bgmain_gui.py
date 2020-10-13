@@ -141,12 +141,13 @@ class SelectGas(QWidget):
         #self.print_gas('after updateTable')
 
     def table_to_self(self, num):
-        # TODO : add a test to allow a 0,5 to be transformed to float
         #print('f=table_to_self')
         self.num = len(gases)
         self.spec = str(self.tableWidget.item(1, 0).text())
         for i, key in enumerate(self.gasKey[2:]):
-            setattr(self, key, float(self.tableWidget.item(i+2, 0).text()))
+            #replace ',' by '.' for float conversion
+            val = self.tableWidget.item(i+2, 0).text().replace(',', '.')
+            setattr(self, key, float(val))
 
     def self_to_selfObj(self, num):
         #print('f=self_to_selfObj')
@@ -700,7 +701,7 @@ class ApplicationWindow(QMainWindow):
             if name == 'cascO2':
 #                bg.plot_cascO2(gases, [0, len(gases)-1], path, ident, save, pyplot)
 #                bg.plot_cascO2Lin(gases, [0, len(gases)-1], path, ident, save, pyplot)
-                bg.plot_cascO2Lin(gases, list(range(len(gases)-1)), path,\
+                bg.plot_cascO2Lin(gases, list(range(len(gases))), path,\
                                   ident, save, pyplot)
             if name == 'gAa':
                 bg.plot_GAa(gases, num, path, ident, save, pyplot)

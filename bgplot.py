@@ -614,7 +614,7 @@ def plot_pieCasc(gases, num, path, ident='', save=False, percent=True, pyplot=Fa
     labels = ['$N_2$', '$O_2$', '$H_2O$', '$CO_2$']
     colors = ['tab:gray', 'tab:green', 'tab:cyan', 'tab:orange']
     valKey = ['N2', 'O2', 'H2O', 'CO2']
-    if num > 1:
+    if num > 0:
         gas = gases[num]
     else:
         gas = gases[0]
