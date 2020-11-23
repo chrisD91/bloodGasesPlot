@@ -608,7 +608,7 @@ class ApplicationWindow(QMainWindow):
                 text = f.read()
                 self.texEdit.setText(text)
 
-    def plot_now(self, name, gases, num, path, ident, save, pyplot, percent):
+    def plot_now(self, name, gases, num, path, ident, save, pyplot, pcent):
         plotList = ['display', 'morpion', 'acidBAse', 'o2', 'ventil', 'sat',
                     'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2', 'gAa',
                     'GAaRatio', 'ratio']
@@ -714,7 +714,7 @@ class ApplicationWindow(QMainWindow):
     def select_plots(self, name, gases, num, path, ident, save, pyplot):
         """ select the plots to be build """
         #print('f select_plots')
-        percent = False
+        pcent = False
         selections = {}
         selections['all'] = ['display', 'morpion', 'acidBAse', 'o2', 'ventil',
                              'sat', 'cao2', 'hbEffect', 'varCaO2', 'pieCasc', 'cascO2',
@@ -732,7 +732,7 @@ class ApplicationWindow(QMainWindow):
             return 1
 
         for item in selection:
-            self.plot_now(item, gases, num, path, ident, save, pyplot, percent)
+            self.plot_now(item, gases, num, path, ident, save, pyplot, pcent)
 
     # select_plots('clin', gases, num, path, ident, save, pyplot)
 

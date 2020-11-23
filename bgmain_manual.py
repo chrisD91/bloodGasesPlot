@@ -5,14 +5,17 @@
 for manual use of the plotting
 """
 
+import os
 import sys
-from imp import reload
+from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
-import os
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from matplotlib.dates import DateFormatter
+
 from bloodGases import bgplot as bg
 
 # ------------------------------------------
@@ -285,6 +288,7 @@ def plot_figs(gases, **kwargs):
         'pyplot' (True) pyplot or matplotlib.Figure
         'path' ('~/test') : to save
         'folder' ('fig') : added to the save path
+        'name'('None') = id of the animal
     Returns
     -------
     figlist : list of plotted figures
@@ -299,7 +303,8 @@ def plot_figs(gases, **kwargs):
               'ident' : '',
               'pyplot' : True,
               'path' : '~/test',
-              'folder' : 'fig'
+              'folder' : 'fig',
+              'name' : None
              }
     params.update(kwargs)
     #functions list
@@ -336,6 +341,7 @@ def plot_figs(gases, **kwargs):
     save = params['save']
     pyplot = params['pyplot']
     num = params['num']
+    name = params.get('name', None)
     for func in func_list:
         if func.__name__ == 'plot_cascO2Lin':
             # this function needs a list of gases
@@ -352,13 +358,22 @@ def plot_figs(gases, **kwargs):
             # fig = item(gases, list(range(len(gases))), path, ident, save, pyplot)
         elif func.__name__ == 'plot_pieCasc':
             fig = func(gases, num, path, ident='', save=save,
-                       percent=True, pyplot=pyplot)
+                       pcent=True, pyplot=pyplot)
             fig = func(gases, num, path, ident='', save=save,
-                       percent=False, pyplot=pyplot)
+                       pcent=False, pyplot=pyplot)
         else:
             fig = func(gases, num, path, ident, save, pyplot)
         figlist.append(fig)
         fignames.append(func.__name__.split('_')[-1])
+    for fig in figlist:
+        fig.text(0.99, 0.01, 'bgPlot', ha='right', va='bottom',
+                 alpha=0.4, size=12)
+        if name is None:
+            fig.text(0.01, 0.01, 'cDesbois', ha='left', va='bottom',
+                     alpha=0.4, size=12)
+        else:
+            fig.text(0.01, 0.01, name, ha='left', va='bottom',
+                     alpha=0.4, size=12)
     return figlist, fignames
 
 
@@ -431,13 +446,11 @@ def plot_evol_o2co2(df):
     """
     Parameters
     ----------
-    df : TYPE
-        DESCRIPTION.
-
+    df : pandas dataframe
+        (index can be set to date_time)
     Returns
     -------
-    fig : TYPE
-        DESCRIPTION.
+    fig : pyplot figure.
     """
     fig = plt.figure(figsize=(8, 4))
     fig.suptitle('respiratoire', color='tab:gray')
@@ -445,6 +458,10 @@ def plot_evol_o2co2(df):
     ax = fig.add_subplot(111)
     ax.plot(df.po2, '-o', color='tab:red', ms=10)
     ax.set_ylabel('$Pa 0_2$', color='tab:red')
+    usual = [80, 112]
+    spread = set(usual) | set(ax.get_ylim())
+    ax.set_ylim(min(spread), max(spread))
+
     ax.spines['left'].set_color('tab:red')
     ax.tick_params(axis='y', colors='tab:red')
     ax.axhline(90, color='tab:red', linestyle='dashed', alpha=.4, linewidth=3)
@@ -454,6 +471,10 @@ def plot_evol_o2co2(df):
     axT = ax.twinx()
     axT.plot(df.pco2, '-o', color='tab:blue', ms=10)
     axT.set_ylabel('$Pa C0_2$', color='tab:blue')
+    usual = [36, 46]
+    spread = set(usual) | set(axT.get_ylim())
+    axT.set_ylim(min(spread), max(spread))
+
     axT.spines['right'].set_color('tab:blue')
     axT.tick_params(axis='y', colors='tab:blue')
     axT.axhline(40, color='tab:blue', linestyle='dashed', alpha=.6, linewidth=3)
@@ -463,9 +484,14 @@ def plot_evol_o2co2(df):
     # gas_list = ['gas' + item for item in gas_list]
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
-        ax.xaxis.set_ticks(np.arange(len(df)))
-        # ax.xaxis.set_ticklabels(gas_list)
-        ax.xaxis.set_ticklabels(df.heure)
+        # chelck if index is datetime
+        if df.index.dtype !=  '<M8[ns]':
+            ax.xaxis.set_ticks(np.arange(len(df)))
+            # ax.xaxis.set_ticklabels(gas_list)
+            ax.xaxis.set_ticklabels(df.heure)
+        else:
+            date_format = DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
         ax.spines['bottom'].set_color('tab:gray')
         ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()
@@ -476,9 +502,8 @@ def plot_acidobas(df):
     """
     Parameters
     ----------
-    df : TYPE
-        DESCRIPTION.
-
+    df : pandas dataframe
+    (index can be set to datetime)
     Returns
     -------
     None.
@@ -490,10 +515,17 @@ def plot_acidobas(df):
     ax1.plot(df.ph, '-o', color='tab:gray', ms=10)
     ax1.set_ylabel('pH')
     ax1.axhspan(7.35, 7.45, alpha=0.3, color='tab:grey')
+    usual = [7.34, 7.48]
+    spread = set(usual) | set(ax1.get_ylim())
+    ax1.set_ylim(min(spread), max(spread))
+
 
     ax2 = fig.add_subplot(212)
     ax2.plot(df.pco2, '-o', color='tab:blue', ms=10)
     ax2.set_ylabel('$Pa CO_2$', color='tab:blue')
+    usual = [36, 46]
+    spread = set(usual) | set(ax2.get_ylim())
+    ax2.set_ylim(min(spread), max(spread))
     ax2.spines['left'].set_color('tab:blue')
     ax2.tick_params(axis='y', colors='tab:blue')
     for spine in ['top', 'right']:
@@ -502,6 +534,9 @@ def plot_acidobas(df):
     ax3 = ax2.twinx()
     ax3.plot(df.hco3, '-o', color='tab:orange', ms=10)
     ax3.set_ylabel('$HCO_3$', color='tab:orange')
+    usual = [22, 29]
+    spread = set(usual) | set(ax3.get_ylim())
+    ax3.set_ylim(min(spread), max(spread))
     ax3.spines['right'].set_color('tab:orange')
     ax3.tick_params(axis='y', colors='tab:orange')
     for spine in ['top', 'left']:
@@ -509,11 +544,15 @@ def plot_acidobas(df):
 
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
-        ax.xaxis.set_ticks(np.arange(len(df)))
-        # ax.xaxis.set_ticklabels(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(df.heure)
-        ax.spines['bottom'].set_color('tab:gray')
-        ax.tick_params(axis='x', colors='tab:gray')
+        if df.index.dtype !=  '<M8[ns]':
+            ax.xaxis.set_ticks(np.arange(len(df)))
+            # ax.xaxis.set_ticklabels(gas_list)
+            ax.xaxis.set_ticklabels(df.heure)
+        else:
+            date_format = DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
+    ax.spines['bottom'].set_color('tab:gray')
+    ax.tick_params(axis='x', colors='tab:gray')
     ax1.spines["right"].set_visible(False)
     fig.tight_layout()
     return fig
@@ -535,6 +574,9 @@ def plot_metabo(df):
     ax = fig.add_subplot(111)
     ax.plot(df.hco3, '-o', color='tab:orange', ms=10)
     ax.set_ylabel('$HCO_3$', color='tab:orange')
+    usual = [22, 29]
+    spread = set(usual) | set(ax.get_ylim())
+    ax.set_ylim(min(spread), max(spread))
     ax.spines['left'].set_color('tab:orange')
     ax.tick_params(axis='y', colors='tab:orange')
     for spine in ['top', 'right']:
@@ -542,16 +584,27 @@ def plot_metabo(df):
 
     axT = ax.twinx()
     axT.plot(df.anGap, '-o', color='tab:cyan', ms=10)
+    # usual = [130, 145]
+    # spread = set(usual) | set(axT.get_ylim())
+    # ax.set_ylim(min(spread), max(spread))
     axT.set_ylabel('anGap', color='tab:cyan')
     axT.spines['right'].set_color('tab:cyan')
     axT.tick_params(axis='y', colors='tab:cyan')
+    usual = [5, 16]
+    spread = set(usual) | set(axT.get_ylim())
+    axT.set_ylim(min(spread), max(spread))
+
     for spine in ['top', 'left']:
         axT.spines[spine].set_visible(False)
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
-        ax.xaxis.set_ticks(np.arange(len(df)))
-        # ax.xaxis.set_ticklabels(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(df.heure)
+        if df.index.dtype !=  '<M8[ns]':
+            ax.xaxis.set_ticks(np.arange(len(df)))
+            # ax.xaxis.set_ticklabels(np.arange(len(df)))
+            ax.xaxis.set_ticklabels(df.heure)
+        else:
+            date_format = DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
         ax.spines['bottom'].set_color('tab:gray')
         ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()
@@ -577,6 +630,9 @@ def plot_iono(df):
     # lims = ax.get_xlim()
     # ax.hlines(135, *lims, colors='r', alpha=0.5, linestyles='dashed')
     # ax.hlines(145, *lims, colors='r', alpha=0.5, linestyles='dashed')
+    usual = [136, 142]
+    spread = set(usual) | set(ax.get_ylim())
+    ax.set_ylim(min(spread), max(spread))
     ax.set_ylabel('$Na^+$', color='tab:red')
     ax.spines['left'].set_color('tab:red')
     ax.tick_params(axis='y', colors='tab:red')
@@ -586,6 +642,9 @@ def plot_iono(df):
     axT = ax.twinx()
     axT.plot(df.Cl, '-o', color='tab:blue', ms=10)
     axT.set_ylabel('$Cl^-$', color='tab:blue')
+    usual = [98, 104]
+    spread = set(usual) | set(axT.get_ylim())
+    axT.set_ylim(min(spread), max(spread))
     # lims = axT.get_xlim()
     # axT.hlines(110, *lims, colors='b', alpha=0.5, linestyles='dashed')
     # axT.hlines(95, *lims, colors='b', alpha=0.5, linestyles='dashed')
@@ -597,6 +656,9 @@ def plot_iono(df):
     ax2 = fig.add_subplot(212)
     ax2.plot(df.K, '-o', color='tab:purple', ms=10)
     ax2.set_ylabel('$K^+$', color='tab:purple')
+    usual = [2.2, 4]
+    spread = set(usual) | set(ax2.get_ylim())
+    ax2.set_ylim(min(spread), max(spread))
     ax2.spines['left'].set_color('tab:purple')
     ax2.tick_params(axis='y', colors='tab:purple')
     for spine in ['top', 'right']:
@@ -605,6 +667,9 @@ def plot_iono(df):
     ax2T = ax2.twinx()
     ax2T.plot(df.ph, '-o', color='tab:gray', ms=10)
     ax2T.set_ylabel('pH', color='tab:gray')
+    usual = [7.34, 7.48]
+    spread = set(usual) | set(ax2T.get_ylim())
+    ax2.set_ylim(min(spread), max(spread))
     ax2T.spines['right'].set_color('tab:gray')
     ax2T.tick_params(axis='y', colors='tab:gray')
     for spine in ['top', 'left']:
@@ -612,9 +677,13 @@ def plot_iono(df):
 
     for ax in fig.get_axes():
         ax.spines['top'].set_visible(False)
-        ax.xaxis.set_ticks(np.arange(len(df)))
-        # ax.xaxis.set_ticklabels(np.arange(len(df)))
-        ax.xaxis.set_ticklabels(df.heure)
+        if df.index.dtype !=  '<M8[ns]':
+            ax.xaxis.set_ticks(np.arange(len(df)))
+            # ax.xaxis.set_ticklabels(np.arange(len(df)))
+            ax.xaxis.set_ticklabels(df.heure)
+        else:
+            date_format = DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
         ax.spines['bottom'].set_color('tab:gray')
         ax.tick_params(axis='x', colors='tab:gray')
 
@@ -642,9 +711,13 @@ def plot_hb(df):
     ax.tick_params(axis='y', colors='tab:red')
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
-    ax.xaxis.set_ticks(np.arange(len(df)))
-    # ax.xaxis.set_ticklabels(np.arange(len(df)))
-    ax.xaxis.set_ticklabels(df.heure)
+        if df.index.dtype !=  '<M8[ns]':
+            ax.xaxis.set_ticks(np.arange(len(df)))
+            # ax.xaxis.set_ticklabels(np.arange(len(df)))
+            ax.xaxis.set_ticklabels(df.heure)
+        else:
+            date_format = DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
     ax.spines['bottom'].set_color('tab:gray')
     ax.tick_params(axis='x', colors='tab:gray')
     fig.tight_layout()

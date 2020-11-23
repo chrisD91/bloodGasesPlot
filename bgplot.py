@@ -594,7 +594,7 @@ def plot_ventil(gases, num, path, ident='', save=False, pyplot=False):
     return fig
 
 #------------------------------------
-def plot_pieCasc(gases, num, path, ident='', save=False, percent=True, pyplot=False):
+def plot_pieCasc(gases, num, path, ident='', save=False, pcent=True, pyplot=False):
                      #fio2=0.21, paco2=40
     """
     pie charts or gas % content,
@@ -604,7 +604,7 @@ def plot_pieCasc(gases, num, path, ident='', save=False, percent=True, pyplot=Fa
         path = path to save
         ident = string to identify in the save name
         save : boolean
-        percent : boolean (output in '%' or mmHg)
+        pcent : boolean (output in '%' or mmHg)
         pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
     output : plot (pyplot or FigureObj)
     """
@@ -636,7 +636,7 @@ def plot_pieCasc(gases, num, path, ident='', save=False, percent=True, pyplot=Fa
         values = []
         for id in valKey[:i+1]:
             values.append(val[i-1][id])
-        if percent:
+        if pcent:
             ax.pie(values, explode=explodes[i-1], labels=labels[:i+1],
                    colors=colors[:i+1], autopct='%1.1f', 
                    counterclock=False, textprops={'alpha':0.6},
@@ -659,7 +659,7 @@ def plot_pieCasc(gases, num, path, ident='', save=False, percent=True, pyplot=Fa
     if pyplot:
         fig.tight_layout()
         if save:
-            if percent:
+            if pcent:
                 name = os.path.join(path, (str(ident)+'pieCascPercent'))
             else:
                 name = os.path.join(path, (str(ident)+'pieCasc'))
