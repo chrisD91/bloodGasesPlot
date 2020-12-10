@@ -33,26 +33,45 @@ usual = dict(
 
 plt.close('all')
 
-def plot_aniongap():
+def plot_aniongap(**kwargs):
     """
     plot the normal anionGap values
-
+    input  na (140) k (3.5), cl = 105, hco3 = 24,
+    
     Returns
     -------
     fig : matplotlib figure
 
     """
+    iono_std = dict(
+        na = 140,
+        k = 3.5,
+        cl = 105,
+        hco3 = 24,
+        albu=40,
+        phosphore=1
+        )
+    vals = iono_std.copy()
+    vals.update(kwargs)
+    
+    
     categories = ['cations', 'anions']
 
     # [na, indosés(mg, ca, k)]
-    cations = [140, 30]
+    cations = [140, 5, 25]
+    cations = [vals['na'], vals['k'], 25]
+    print(cations)
+
     # [cl, hco3, albumine, phosphate, indosés (Xa, lactates)]
     anions = [105, 25]
-    fig = plt.figure()
+    anions = [vals['cl'], vals['hco3']]
+    print(anions)
+
+    fig = plt.figure(figsize=(6,8))
     ax = fig.add_subplot(111)
     base = sum(cations)
-    colors = ['tab:green', 'k']
-    fills = [True, False]
+    colors = ['tab:red', 'tab:purple','k']
+    fills = [True, True, False]
     for i, v in enumerate(cations):
         ax.bar(categories[0], v, bottom=base-v, ec='k', color=colors[i],
                fill=fills[i], linewidth=3, alpha=0.3)
@@ -68,15 +87,15 @@ def plot_aniongap():
 
     yval = sum(cations) - anions[0] - anions[1]
 
-    ax.hlines(cations[1], -0.5, 0.6, 'k', linewidth=3, linestyles=':')
+    ax.hlines(cations[2], -0.5, 0.6, 'k', linewidth=3, linestyles=':')
     ax.hlines(yval, 0.4, 1.5, 'k', linewidth=3, linestyles=':')
-
-    ax.annotate('anion gap', xy=(.5, cations[1] + (yval - cations[1])/2),
+    
+    agap = vals['na'] + vals['k'] -  vals['cl'] - vals['hco3']
+    ax.annotate('anion gap {}'.format(agap), 
+                xy=(.5, cations[1] + (yval - cations[1])/2),
                 xytext=(0.5, -10), arrowprops=dict(arrowstyle='fancy'),
                 ha='center',
                 bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=1, ec='k'))
-
-
 
     ax.set_ylabel('mmol/L')
     for spine in ['top', 'right']:
@@ -84,7 +103,11 @@ def plot_aniongap():
     ax.text(0, 140, r'$Na^+$', ha='center',
             va='center', color='k')
     y = sum(cations) - cations[0] - .5*cations[1]
-    st = r'$K^+\ Ca^{2+} \ Mg^{2+}$'
+    st = r'$K^+$'
+    ax.text(0, y, st , color='k',
+            ha='center', va='center')
+    y = sum(cations) - cations[0] - cations[1]- .5*cations[2]
+    st = r'$Ca^{2+} \ Mg^{2+}$'
     ax.text(0, y, st , color='k',
             ha='center', va='center')
     ax.text(1, 140, r'$Cl^-$',color='k',
@@ -107,7 +130,7 @@ def plot_aniongap():
             ha='center', va='center')
 
     st = r'NB    pH = f(SID,   $PaCO_2$,   $\sum$ acides faibles)'
-    st = r'$anion\ gap = Na^+ - (Cl^- + HCO_3^-)$     (~12 ± 2)'
+    st = r'$anion\ gap = Na^+ K^+ - (Cl^- + HCO_3^-)$     (~12 ± 2)'
     fig.suptitle(st)
 
     fig.text(0.01, 0.01, 'adapté de Quintard 2007', ha='left', va='bottom',

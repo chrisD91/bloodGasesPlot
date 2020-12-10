@@ -176,13 +176,24 @@ def csv_to_df(filename):
     """
     append new gases from a csvFile
     input : csvFile, delimiter = tab, oneLine per gas
+        columns should be : 
+        key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
     append the gases to the lists (gases, gasesV)
     return a pandasDataFrame
     """
     key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
     # load file as pd.DataFrame
     df = pd.read_csv(filename, sep='\t', decimal=',')
-    # test if the needed values are present
+    # adapt the columns
+    cols = list(map(str.lower, df.columns))
+    cols = [st.replace('+', '') for st in cols]
+    cols = [st.replace('-', '') for st in cols]
+    df.columns = cols
+    # rename if required
+    corr_title = {'thb': 'hb'}
+    df.rename(columns=corr_title, inplace=True)
+    
+    # test for missing columns
     for item in key_list:
         if item not in df.columns:
             print(item, 'is missing in the file')
