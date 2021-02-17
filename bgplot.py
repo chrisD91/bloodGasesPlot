@@ -57,7 +57,7 @@ class Gas(object):
         self.hb = kwargs.get('hb', 12)
         self.fio2 = kwargs.get('fio2', 0.21)
         if self.fio2 >= 1:
-            self.fio2 /= 100
+            self.fio2 = round(self.fio2 / 100, 2)
         self.po2 = kwargs.get('po2', 95)
         self.ph = kwargs.get('ph', 7.4)
         self.pco2 = kwargs.get('pco2', 40)
