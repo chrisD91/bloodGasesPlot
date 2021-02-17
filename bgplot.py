@@ -680,10 +680,14 @@ def plot_cascO2(gases, nums, path, ident='', save=False, pyplot=False):
         pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
     output : histogram plot (pyplot or FigureObj)
     """
-    values = []
-    for item in nums:
-        gas = gases[item]
-        values.append(gas.casc())
+       # ref
+    if 0 not in nums:
+        nums.insert(0, 0)
+    values = {}
+    for num in nums:
+        if num in range(len(gases)):
+            gas = gases[num]
+            values[num] = gas.casc()
     if pyplot:
         fig = plt.figure(figsize=(14, 6))
     else:
@@ -696,8 +700,11 @@ def plot_cascO2(gases, nums, path, ident='', save=False, pyplot=False):
 
     ind = np.arange(4)     # class histo (insp-aerien-alveolaire-artériel)
     width = 0.2            # distance entre les plots
-    for i, item in enumerate(values):
-        ax.bar(ind+i*width, item, width, alpha=0.6, label='g'+str(nums[i]), 
+    for i, (k, item) in enumerate(values.items()):            
+        label = 'g {}'.format(str(int(k)))
+        if k == 0:
+            label = 'ref'
+        ax.bar(ind+i*width, item, width, alpha=0.6, label=label, 
                edgecolor='w', linewidth=1)
     ax.set_title('cascade de l\' oxygène', color='tab:gray')
     ax.set_ylabel('pression partielle (mmHg)', color='tab:gray')
@@ -741,14 +748,14 @@ def plot_cascO2Lin(gases, nums, path, ident='', save=False, pyplot=False):
         pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
     output : histogram plot (pyplot or FigureObj)
     """
-    values = []
-    if len(gases) > 1:
-        for num in nums:
+    # ref
+    if 0 not in nums:
+        nums.insert(0, 0)
+    values = {}
+    for num in nums:
+        if num in range(len(gases)):
             gas = gases[num]
-            values.append(gas.casc())
-    else:
-        gas = gases[0]
-        values.append(gas.casc())
+            values[num] = gas.casc()
     if pyplot:
         fig = plt.figure(figsize=(14, 6))
     else:
@@ -756,22 +763,19 @@ def plot_cascO2Lin(gases, nums, path, ident='', save=False, pyplot=False):
     # fig.suptitle(r'$Palv_{0_2} = Finsp_{O_2}*((P_{atm} - P_{H_2O}) - Pa_{CO_2}/Q_r)$'
     # ' avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $', fontsize=14)
     ax = fig.add_subplot(111)
-    # ind = np.arange(4)     # class histo (insp-aerien-alveolaire-artériel)
-    # width = 0.2            # distance entre les plots
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
-    # ax.get_xaxis().tick_bottom()
-    # ax.get_yaxis().tick_left()
-
-    for i, val in enumerate(values):
-        ax.plot(val, 'o-.', label='gas'+str(nums[i]), linewidth=2, ms=10,
-                alpha=0.8)
-    ax.set_title('cascade de l\' oxygène', alpha=0.5)
+    for i, (k, val) in enumerate(values.items()):
+        label = 'gas {}'.format(int(k))
+        if k == 0:
+            label = 'ref'
+        ax.plot(val, 'o-.', label=label, linewidth=2, ms=10, alpha=0.8)
+    ax.set_title('cascade de l oxygène', alpha=0.5)
     ax.set_ylabel('pression partielle (mmHg)', alpha=0.5)
     ax.axhline(y=95, xmin=0.9, linewidth=2, alpha=1, color='red')
     ax.axhline(y=40, xmin=0.9, linewidth=2, alpha=1, color='blue')
     ax.axhline(y=159, xmin=0.02, xmax=0.10, linewidth=2, alpha=1, color='g')
-    #ax.set_xlabel
+    # ax.set_xlabel
     ax.set_xticks(range(len(val)))
     ax.set_xticklabels(('insp', 'aérien', 'alvéolaire', 'artériel'))
     ax.tick_params(colors='tab:gray')

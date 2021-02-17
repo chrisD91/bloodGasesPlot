@@ -16,8 +16,9 @@ import numpy as np
 import pandas as pd
 from matplotlib.dates import DateFormatter
 
-from bloodGases import bgplot as bg
 
+# from bloodGases import bgplot as bg
+from . import bgplot
 # ------------------------------------------
 
 
@@ -97,7 +98,7 @@ paths_b = build_path()
 #append_blood_gases_path(paths_b)
 
 
-#%%
+# ----------------------------------------------- end config
 # manual use:
 # spec='horse', hb=12, fio2=0.21, po2=95, ph=7.4, pco2=40, hco3=24, etco2=38
 
@@ -114,11 +115,11 @@ def append_from_dico(dico, gaslist=None, gasvisu=None):
 
     output : append in gaslist and gasvisu
     """
-    if not gaslist:
+    if gaslist is None:
         gaslist = []
-    if not gasvisu:
+    if gasvisu is None:
         gasvisu = {}
-    if not dico:
+    if dico is None:
         dico = dict(spec='horse', hb=12, fio2=0.21, po2=95,
                     ph=7.4, pco2=40, hco3=24, etco2=38)
 
@@ -126,8 +127,8 @@ def append_from_dico(dico, gaslist=None, gasvisu=None):
         #         'ph': 7.4, 'pco2': 40, 'hco3': 24, 'etco2': 38}
 
     # key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
-    # gas = bg.Gas(*[dico[item] for item in key_list])
-    gas = bg.Gas(**dico)
+    # gas = bgplot.Gas(*[dico[item] for item in key_list])
+    gas = bgplot.Gas(**dico)
     gaslist.append(gas)
     name = 'g' + str(len(gaslist) - 1)
     gasvisu[name] = gas.__dict__
@@ -137,10 +138,6 @@ def append_from_dico(dico, gaslist=None, gasvisu=None):
     #TODO validate this return (previous was using globals gases and gasesV)
     return gaslist, gasvisu
 
-
-# build the reference set (ie room air, normal lung, normal respiratory state)
-gas_list, gas_visu = append_from_dico(None)
-#%%
 
 def userinput_to_dico():
     """
@@ -209,10 +206,8 @@ def csv_to_df(filename):
                 df[col] = df[col].fillna(ref.get(col))
     return df
 
-def df_append_to_gases(df, gaslist, gasvisu):
+def df_append_to_gases(df, gaslist=None, gasvisu=None):
     """
-
-
     Parameters
     ----------
     df : pandas DataFrame
@@ -224,14 +219,30 @@ def df_append_to_gases(df, gaslist, gasvisu):
 
     Returns
     -------
-    None.
+    gaslist : list of gases objects
+    gasvisu : dico for visualisation
 
     """
+    # initialise if empty
+    if gaslist is None :
+        gaslist, gasvisu =  append_from_dico(None)
+    # fill line by line
     for i in range(len(df)):
-        append_from_dico(df.iloc[i].to_dict(),
-                         gaslist=gaslist, gasvisu=gasvisu)
+        gaslist, gasvisu =  append_from_dico(df.iloc[i].to_dict(),
+                                             gaslist=gaslist, gasvisu=gasvisu)
+    print('_' * 15)
+    print('added {} gases to the gas list'.format(i))
+    return gaslist, gasvisu
 
-    return i
+
+# build the reference set (ie room air, normal lung, normal respiratory state)
+gas_list, gas_visu = append_from_dico(None)
+
+append=False
+if append:
+    df = csv_to_df(filename)
+    gas_list, gas_visu = df_append_to_gases(df, gas_list, gas_visu)
+
 
 #%%%%%%%%%%%%%% append values
 # by user input
@@ -319,15 +330,15 @@ def plot_figs(gases, **kwargs):
              }
     params.update(kwargs)
     #functions list
-    plot_dico = {'all': [bg.display, bg.morpion, bg.plot_acidbas, bg.plot_o2, \
-                        bg.plot_ventil, bg.plot_satHb, bg.plot_cascO2, \
-                        bg.plot_hbEffect, bg.plot_varCaO2, bg.plot_pieCasc, \
-                        bg.plot_cascO2, bg.plot_cascO2Lin, bg.plot_GAa, \
-                        bg.plot_GAaRatio, bg.plot_ratio],
-                 'clin' : [bg.display, bg.morpion, bg.plot_acidbas, bg.plot_o2, \
-                          bg.plot_ventil, bg.plot_satHb, bg.plot_CaO2, bg.plot_hbEffect,\
-                          bg.plot_varCaO2, bg.plot_pieCasc, bg.plot_cascO2Lin, bg.plot_GAa,\
-                          bg.plot_GAaRatio, bg.plot_ratio]
+    plot_dico = {'all': [bgplot.display, bgplot.morpion, bgplot.plot_acidbas, bgplot.plot_o2, \
+                        bgplot.plot_ventil, bgplot.plot_satHb, bgplot.plot_cascO2, \
+                        bgplot.plot_hbEffect, bgplot.plot_varCaO2, bgplot.plot_pieCasc, \
+                        bgplot.plot_cascO2, bgplot.plot_cascO2Lin, bgplot.plot_GAa, \
+                        bgplot.plot_GAaRatio, bgplot.plot_ratio],
+                 'clin' : [bgplot.display, bgplot.morpion, bgplot.plot_acidbas, bgplot.plot_o2, \
+                          bgplot.plot_ventil, bgplot.plot_satHb, bgplot.plot_CaO2, bgplot.plot_hbEffect,\
+                          bgplot.plot_varCaO2, bgplot.plot_pieCasc, bgplot.plot_cascO2Lin, bgplot.plot_GAa,\
+                          bgplot.plot_GAaRatio, bgplot.plot_ratio]
                 }
     if params['reverse']:
         # reverse the order of the display
@@ -437,8 +448,8 @@ if plot:
     picts = ['alveoloCap.png', 'alveolPhysio.png', 'alveolDS.png', 'alveolShuntFoncti.png']
     #pictPath = '/Users/cdesbois/enva/illustrations/shémas/respi/shuntDs'
 
-    figure = bg.showPicture(picts[:2], paths_b.pict_)   # alvCap + physio
-    figure = bg.showPicture(picts[2:], paths_b.pict_)   # dsShuntemail
+    figure = bgplot.showPicture(picts[:2], paths_b.pict_)   # alvCap + physio
+    figure = bgplot.showPicture(picts[2:], paths_b.pict_)   # dsShuntemail
 
 #%% to plot from csv: (see libreOffice template)
 csv = False
