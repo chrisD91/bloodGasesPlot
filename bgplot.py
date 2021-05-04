@@ -13,7 +13,7 @@ from matplotlib.ticker import FormatStrFormatter
 rcParams.update({'font.size': 18, 'font.family': 'serif'})
 
 #==============================================================================
-class Gas(object):
+class Gas():
     """
     + gas class to manipulate bloodGases
 
@@ -64,7 +64,7 @@ class Gas(object):
         self.hco3 = kwargs.get('hco3', 24)
         self.etco2 = kwargs.get('etco2', 38)
         Gas.gasesGasList.append(self)
-            
+
     @classmethod
     def return_gasList(objList):
         return Gas.gasesGasList
@@ -152,8 +152,8 @@ def satFit(species):
     item = sat_curv['id'].index(species)
     for key in sat_curv.keys():
         sat_param [key] = sat_curv[key][item]
-    return sat_param 
-        
+    return sat_param
+
 # fit Hill fonction:
 # r$ fit = base + \frac{max-base}{(1 + (\frac{xhalf}{x})^{rate})} $
 # r$ SatHb_{02} = base + \frac{max-base}{(1 + (\frac{P_{50}}{P_{O_2}})^{n})} $ (n= coeff de Hill)
@@ -232,17 +232,16 @@ def plot_acidbas(gases, num, path, ident='', save=False, pyplot=False):
             axes.append(fig.add_subplot(3, 1, i))
     # fig.suptitle("acidobasique ($pH, \ Pa_{CO_2}, \ HCO_3^-$ )", fontsize=24,
     #              color='tab:gray')
-    legs = [(r"$pH$", "k"), 
-            (r"$P_{CO_2}$", "tab:blue"), 
+    legs = [(r"$pH$", "k"),
+            (r"$P_{CO_2}$", "tab:blue"),
             (r"$HCO_3^-$","tab:orange")]
     for ax, leg in zip(axes, legs):
         ax.axhline(0, color='tab:gray')
-        ax.text(0.05, 0.5, leg[0], fontsize=22, color=leg[1], 
-            horizontalalignment='left', verticalalignment='center', 
+        ax.text(0.05, 0.5, leg[0], fontsize=22, color=leg[1],
+            horizontalalignment='left', verticalalignment='center',
             transform=ax.transAxes, backgroundcolor='w')
- 
-    fig.suptitle('acide ---------------------------------------------------------------------------- alcalin',
-                 color='tab:gray')
+    txt = 'acid {} alcalin'.format(('-'*76))
+    fig.suptitle(txt,  color='tab:gray')
     ax = axes[0]
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     ax.plot(phRange, [0, 0], label='line 1', linewidth=5, color="tab:gray",
@@ -262,9 +261,9 @@ def plot_acidbas(gases, num, path, ident='', save=False, pyplot=False):
         co2max = pco2 + 5
     if pco2 <= co2min:
         co2min = pco2 -5
-    ax.plot([35, 45], [0, 0], label='line 1', linewidth=5, color='tab:blue', 
+    ax.plot([35, 45], [0, 0], label='line 1', linewidth=5, color='tab:blue',
             alpha=0.8, marker='d', markersize=10)
-    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32, 
+    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32,
             markeredgecolor='k')
     ax.set_xlim([co2max, co2min])
 
@@ -365,7 +364,7 @@ def phline(val):
     #low´´
     if val < ref[0]:
         arrow[0] = '<<'
-    elif (ref[0] < val < ref[1]):
+    elif ref[0] < val < ref[1]:
         arrow[0] = 'x'
     # middle
     elif ref[1] < val < ref[2]:
@@ -491,14 +490,14 @@ def plot_o2(gases, num, path, ident='', save=False, pyplot=False):
     ax.axhline(0, color='tab:gray')
     ax.plot([90, 100], [0, 0], label='line 1', linewidth=5, color='tab:green',
             marker='d', markersize=10, )
-    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32, 
+    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32,
             markeredgecolor='k')
     if po2 < 120:
         ax.set_xlim([po2 - 20, 120])
     else:
         ax.set_xlim([70, po2 + 20])
-    ax.text(0.05, 0.5, r"$P_{O_2}$", fontsize=32, color="tab:green", 
-            horizontalalignment='left', verticalalignment='center', 
+    ax.text(0.05, 0.5, r"$P_{O_2}$", fontsize=32, color="tab:green",
+            horizontalalignment='left', verticalalignment='center',
             transform=ax.transAxes, backgroundcolor='w')
     for spine in ['top', 'right', 'left', 'bottom']:
         ax.spines[spine].set_visible(False)
@@ -551,20 +550,20 @@ def plot_ventil(gases, num, path, ident='', save=False, pyplot=False):
     ax = axes[0]
     ax.plot([90, 100], [0, 0], label='line 1', linewidth=3,
             marker='d', markersize=10, color='tab:green')
-    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32, 
+    ax.plot([po2], [0], 'v-', color='tab:red', markersize=32,
             markeredgecolor='k')                     # po2
     if po2 < 120:
         ax.set_xlim([po2-20, 120])
     else:
         ax.set_xlim([70, po2+20])
-    ax.text(0.05, 0.5, r"$P_{O_2}$", fontsize=32, color="tab:green", 
-            horizontalalignment='left', verticalalignment='center', 
+    ax.text(0.05, 0.5, r"$P_{O_2}$", fontsize=32, color="tab:green",
+            horizontalalignment='left', verticalalignment='center',
             transform=ax.transAxes, backgroundcolor='w')
-            
+
     ax = axes[1]
-    ax.plot([35, 45], [0, 0], label='line 1', linewidth=3, 
+    ax.plot([35, 45], [0, 0], label='line 1', linewidth=3,
             marker='d', markersize=10)
-    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32, 
+    ax.plot([pco2], [0], 'v-', color='tab:red', markersize=32,
             markeredgecolor='k')                     # pco2
     co2min, co2max = 25, 55
     if pco2 >= co2max:
@@ -572,8 +571,8 @@ def plot_ventil(gases, num, path, ident='', save=False, pyplot=False):
     if pco2 <= co2min:
         co2min = pco2 -5
     ax.set_xlim([co2min, co2max])
-    ax.text(0.05, 0.5, r"$P_{CO_2}$", fontsize=32, color="tab:blue", 
-            horizontalalignment='left', verticalalignment='center', 
+    ax.text(0.05, 0.5, r"$P_{CO_2}$", fontsize=32, color="tab:blue",
+            horizontalalignment='left', verticalalignment='center',
             transform=ax.transAxes, backgroundcolor='w')
 
     for ax in axes:
@@ -634,15 +633,15 @@ def plot_pieCasc(gases, num, path, ident='', save=False, pcent=True, pyplot=Fals
         ax = fig.add_subplot(1, 3, i)
         ax.set_title(titles[i-1], y=.99, alpha=0.5)
         values = []
-        for id in valKey[:i+1]:
-            values.append(val[i-1][id])
+        for ind in valKey[:i+1]:
+            values.append(val[i-1][ind])
         if pcent:
             ax.pie(values, explode=explodes[i-1], labels=labels[:i+1],
-                   colors=colors[:i+1], autopct='%1.1f', 
+                   colors=colors[:i+1], autopct='%1.1f',
                    counterclock=False, textprops={'alpha':0.6},
                    wedgeprops={'alpha':0.7, 'linewidth':1, 'ec':'w'})
             # use autopct='%1.1f%%' to display the % symbol
-            fig.text(0.5, 0.9, 'en %', alpha = 0.5, 
+            fig.text(0.5, 0.9, 'en %', alpha = 0.5,
                      horizontalalignment='center')
         else:
             ax.pie(values, explode=explodes[i-1], labels=labels[:i+1],
@@ -664,7 +663,7 @@ def plot_pieCasc(gases, num, path, ident='', save=False, pcent=True, pyplot=Fals
             else:
                 name = os.path.join(path, (str(ident)+'pieCasc'))
             name = os.path.expanduser(name)
-            saveGraph(name, ext='png', close=True, verbose=True)        
+            saveGraph(name, ext='png', close=True, verbose=True)
     return fig
 
 #----------------------------------------------
@@ -700,11 +699,11 @@ def plot_cascO2(gases, nums, path, ident='', save=False, pyplot=False):
 
     ind = np.arange(4)     # class histo (insp-aerien-alveolaire-artériel)
     width = 0.2            # distance entre les plots
-    for i, (k, item) in enumerate(values.items()):            
+    for i, (k, item) in enumerate(values.items()):
         label = 'g {}'.format(str(int(k)))
         if k == 0:
             label = 'ref'
-        ax.bar(ind+i*width, item, width, alpha=0.6, label=label, 
+        ax.bar(ind+i*width, item, width, alpha=0.6, label=label,
                edgecolor='w', linewidth=1)
     ax.set_title('cascade de l\' oxygène', color='tab:gray')
     ax.set_ylabel('pression partielle (mmHg)', color='tab:gray')
@@ -721,7 +720,7 @@ def plot_cascO2(gases, nums, path, ident='', save=False, pyplot=False):
 
     for j, lst in enumerate(values):
         for i, item in enumerate(lst):
-            ax.annotate(str(int(lst[i])), xy=(1, 2), color='tab:grey', 
+            ax.annotate(str(int(lst[i])), xy=(1, 2), color='tab:grey',
                         xytext=(i+j*width, lst[i]+5),
                         horizontalalignment='center')
 
@@ -1009,6 +1008,7 @@ def plot_RatioVsFio2(mes, savepath, ident='', save=False, pyplot=False):
     paO2Range = np.linspace(100, 500, 200)
     fiO2Range = np.linspace(0.2, 1, 200)
 
+
     ax.plot(paO2Range, fiO2Range)
     ax.plot([100, 100], [0, 1], 'tab:red', linewidth=8, alpha=0.4) #ref
     ax.plot([40, 40], [0, 1], color="tab:blue", linewidth=26, alpha=0.4)
@@ -1057,7 +1057,7 @@ def plot_satHb(gases, num, path, ident='', save=False, pyplot=False):
         O2max = paO2 + 50
     else:
         O2max = 200
-    O2Range = np.linspace(1, O2max, O2max)
+    O2Range = np.arange(1, O2max)
 
     sat = satHbO2(species, paO2)
 
@@ -1079,7 +1079,7 @@ def plot_satHb(gases, num, path, ident='', save=False, pyplot=False):
     ax.plot([paO2, paO2], [0, sat], 'tab:gray', linewidth=1)
     ax.plot([0, paO2], [sat, sat], 'tab:gray', linewidth=1)
 
-    ax.plot(paO2, sat, 'o-', color='tab:red', markersize=32, alpha=.8) 
+    ax.plot(paO2, sat, 'o-', color='tab:red', markersize=32, alpha=.8)
 #    st = "$Pa_{O_2}$ = "+ str(paO2)+ " mmHg"+ "\n"+ "$SatHb_{O_2}$ = " \
 #    + "{:.1f}".format(sat)+" %"
     st1 = "$Pa_{O_2}$ = "+ str(paO2)+ " mmHg"
@@ -1127,7 +1127,7 @@ def plot_CaO2(gases, num, path, ident='', save=False, pyplot=False):
         O2max = paO2 + 50
     else:
         O2max = 200
-    O2Range = np.linspace(1, O2max, O2max)
+    O2Range = np.arange(1, O2max)
     contO2 = caO2(species, hb, paO2)
 
     if pyplot:
@@ -1149,7 +1149,7 @@ def plot_CaO2(gases, num, path, ident='', save=False, pyplot=False):
     eq = r'$Ca_{O_2} = 1.36*satHb_{O_2}* [Hb] \ +\ 0.003*Pa_{O_2}$'
     ax.text(50, 2500, eq, backgroundcolor='w', color='tab:grey')
     ax.plot(O2Range, caO2(species, hb, O2Range), linewidth=2)             #ref
-    ax.plot(O2Range, 0.003*O2Range)
+    ax.plot(O2Range, 0.00 * O2Range)
     ax.plot(paO2, contO2, 'o-', color='tab:red', markersize=22, alpha=0.8)
     ax.set_ylabel(r'$Ca_{O_2}\ (ml/l)$', color='tab:gray')
     ax.set_xlabel(r'$P_{O_2}$', color='tab:gray')
@@ -1193,8 +1193,7 @@ def plot_varCaO2(gases, num, path, ident='', save=False, pyplot=False):
         O2max = paO2 + 50
     else:
         O2max = 200
-    O2Range = np.linspace(1, O2max, O2max)
-    #O2Range = np.linspace(1, 200, 200)
+    O2Range = np.arange(1, O2max)
     sat = satHbO2(species, paO2)
 
     if pyplot:
@@ -1218,9 +1217,9 @@ def plot_varCaO2(gases, num, path, ident='', save=False, pyplot=False):
 
     ax2 = ax1.twinx()
     ax2.get_yaxis().tick_right()
-    ax2.plot(O2Range, ((caO2(species, hb, O2Range+1)- caO2(species, hb, O2Range))), 
+    ax2.plot(O2Range, ((caO2(species, hb, O2Range+1)- caO2(species, hb, O2Range))),
              color='tab:green')
-    ax2.plot(paO2, caO2(species, hb, paO2+1)- caO2(species, hb, paO2), 'o-', 
+    ax2.plot(paO2, caO2(species, hb, paO2+1)- caO2(species, hb, paO2), 'o-',
              color='tab:red', markersize=22, alpha=.7)
     for tl in ax2.get_yticklabels():
         tl.set_color('tab:green')
@@ -1264,7 +1263,7 @@ def plot_hbEffect(gases, num, path, ident='', save=False, pyplot=False):
         O2max = paO2 + 50
     else:
         O2max = 200
-    O2Range = np.linspace(1, O2max, O2max)
+    O2Range = np.arange(1, O2max)
     contO2 = caO2(species, hb, paO2)
 
     if pyplot:
@@ -1314,7 +1313,7 @@ def plot_satHorseDog(savepath, ident='', save=False, pyplot=False):
 
     fig.suptitle('$SatHb_{O_2}$ vs $P_{O_2}$', fontsize=24, color='tab:gray')
     #fig, ax = plt.subplots()
-    PO2 = np.linspace(1, 160)
+    PO2 = np.arange(1, 160)
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     for spine in ['top', 'right']:
         ax.spines[spine].set_visible(False)
