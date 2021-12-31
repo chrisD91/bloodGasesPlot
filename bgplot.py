@@ -37,7 +37,7 @@ class Gas:
     """
 
     # to store the gasesObj
-    gasesGasList = []
+    gasesGasList: list = []
 
     #     def __init__(self, spec='horse', hb=12, fio2=0.21, po2=95, ph=7.4,
     #                  pco2=40, hco3=24, etco2=38):

@@ -151,7 +151,7 @@ class SelectGas(QWidget):
                 print(key, "\t", getattr(self, key), "\t\t", getattr(self.bgObj, key))
 
     def self_to_table(self):
-        """ self.attr to table """
+        """self.attr to table"""
         # print('f=self_to_table')
         # self.print_gas('before updateTable')
         for n, item in enumerate(self.gasKey):
@@ -795,7 +795,7 @@ class ApplicationWindow(QMainWindow):
                 bg.plot_ratio(gases, num, path, ident, save, pyplot)
 
     def select_plots(self, name, gases, num, path, ident, save, pyplot):
-        """ select the plots to be build """
+        """select the plots to be build"""
         # print('f select_plots')
         pcent = False
         selections = {}

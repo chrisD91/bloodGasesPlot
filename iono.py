@@ -39,7 +39,7 @@ def plot_aniongap(**kwargs):
     """
     plot the normal anionGap values
     input  na (140) k (3.5), cl = 105, hco3 = 24,
-    
+
     Returns
     -------
     fig : matplotlib figure
@@ -121,7 +121,12 @@ def plot_aniongap(**kwargs):
     st = r"$Ca^{2+} \ Mg^{2+}$"
     ax.text(0, y, st, color="k", ha="center", va="center")
     ax.text(
-        1, 140, r"$Cl^-$", color="k", ha="center", va="center",
+        1,
+        140,
+        r"$Cl^-$",
+        color="k",
+        ha="center",
+        va="center",
     )
 
     y = sum(cations) - anions[0] - 0.5 * anions[1]
