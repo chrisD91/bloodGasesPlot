@@ -7,18 +7,21 @@ for manual use of the plotting
 
 import os
 import sys
+import faulthandler
 from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
 
 import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
 import numpy as np
 import pandas as pd
-from matplotlib.dates import DateFormatter
+from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QWidget
 
 
 # from bloodGases import bgplot as bg
-from . import bgplot
+# from . import bgplot
+import bgplot
 
 # ------------------------------------------
 
@@ -31,7 +34,7 @@ def build_path():
     """
 
     class Bunch(dict):
-        """ Bunch classical Bunch class """
+        """Bunch classical Bunch class"""
 
         def __init__(self, **kwds):
             super().__init__(**kwds)
@@ -76,25 +79,25 @@ def build_path():
 
 
 def append_anesth_plot_path(paths_bunch):
-    """anesthPlot module """
+    """anesthPlot module"""
     base = ["pg", "chrisPg", "enva", "spyder", "record"]
     base.insert(0, paths_bunch.root_)
     mod_path = os.path.expanduser(os.path.join(*base))
     # change the working directory
     if mod_path not in sys.path:
         sys.path.append(mod_path)
-        print("added", mod_path, " to the path")
+        print("added {} to the path".format(mod_path))
     os.chdir(mod_path)
 
 
 def append_blood_gases_path(paths_bunch):
-    """ bloodgases """
+    """bloodgases"""
     base = ["pg", "chrisPg", "enva", "spyder", "bg"]
     base.insert(0, paths_bunch.root_)
     mod_path = os.path.expanduser(os.path.join(*base))
     if mod_path not in sys.path:
         sys.path.append(mod_path)
-        print("added", mod_path, " to the path")
+        print("added {} to the path".format(mod_path))
 
 
 paths_b = build_path()
@@ -122,41 +125,25 @@ def append_from_dico(dico, gaslist=None, gasvisu=None):
     """
     if gaslist is None:
         gaslist = []
+        print("{} builded new gaslist".format("-" * 20))
     if gasvisu is None:
         gasvisu = {}
+        print("{} builded new gasvisu".format("-" * 20))
     if dico is None:
+        # key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
         dico = dict(
             spec="horse", hb=12, fio2=0.21, po2=95, ph=7.4, pco2=40, hco3=24, etco2=38
         )
-
-        # dico = {'spec': 'horse', 'hb': 12, 'fio2': 0.21, 'po2': 95,
-        #         'ph': 7.4, 'pco2': 40, 'hco3': 24, 'etco2': 38}
-
-    # key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
     # gas = bgplot.Gas(*[dico[item] for item in key_list])
     gas = bgplot.Gas(**dico)
     gaslist.append(gas)
     name = "g" + str(len(gaslist) - 1)
     gasvisu[name] = gas.__dict__
-    print(
-        "*spec=",
-        gas.spec,
-        "*hb=",
-        gas.hb,
-        "*fio2= ",
-        gas.fio2,
-        "*po2=",
-        gas.fio2,
-        "*ph=",
-        gas.ph,
-        "*pco2= ",
-        gas.pco2,
-        "*hco3=",
-        gas.hco3,
-        "*etco2=",
-        gas.etco2,
-    )
-    # TODO validate this return (previous was using globals gases and gasesV)
+    print("{} added a new gas from dico".format("-" * 15))
+    for k, v in dico.items():
+        print("{:>6s}= {}".format(k, v))
+
+    print("{} gaslist contains {} gases".format("-" * 20, len(gasvisu)))
     return gaslist, gasvisu
 
 
@@ -205,11 +192,52 @@ def userinput_to_dico():
     return newdico
 
 
+#%% from file
+faulthandler.enable()
+app = QApplication(sys.argv)
+
+
+def choosefile_gui(dirname=None):
+    """Select a file via a dialog and return the (full) filename.
+
+    parameters
+    ----
+    dir_path : str
+        location to place the gui ('generally paths['data']) else home
+
+    return
+    ----
+    fname[0] : str
+        filename
+    """
+    global app
+
+    if dirname is None:
+        dirname = os.path.expanduser("~/enva/clinique/recordings/anesthRecords")
+    ##########
+    # print("define widget")
+    # wid = QWidget()
+    # print("show command")
+    # wid.show()
+    # print("define options")
+    # options = QFileDialog.Options()
+    # options |= QFileDialog.DontUseNativeDialog
+    print("define QFiledialog")
+    fname = QFileDialog.getOpenFileName(
+        None, "Select a file...", dirname, filter="All files (*)"
+    )
+    # FIXME directory=dirname not working
+    print("return")
+    if isinstance(fname, tuple):
+        return fname[0]
+    return str(fname)
+
+
 def csv_to_df(filename):
     """
     append new gases from a csvFile
     input : csvFile, delimiter = tab, oneLine per gas
-        columns should be : 
+        columns should be :
         key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
     append the gases to the lists (gases, gasesV)
     return a pandasDataFrame
@@ -222,6 +250,7 @@ def csv_to_df(filename):
     cols = [st.replace("+", "") for st in cols]
     cols = [st.replace("-", "") for st in cols]
     df.columns = cols
+    df = pd.DataFrame(df)
     # rename if required
     corr_title = {"thb": "hb"}
     df.rename(columns=corr_title, inplace=True)
@@ -284,8 +313,11 @@ def df_append_to_gases(df, gaslist=None, gasvisu=None):
 # build the reference set (ie room air, normal lung, normal respiratory state)
 gas_list, gas_visu = append_from_dico(None)
 
+
 append = False
 if append:
+    if "filename" not in dir():
+        filename = choosefile_gui(paths_b.data_)
     df = csv_to_df(filename)
     gas_list, gas_visu = df_append_to_gases(df, gas_list, gas_visu)
 
@@ -297,11 +329,10 @@ addgas = False
 if addgas:
     # manual input
     adico = userinput_to_dico()
-    # to df
-    try:
-        data_df = data_df.append(adico, ignore_index=True)
-    except:
+    if not "data_df" in dir():
         data_df = pd.DataFrame(adico, index=[0])
+    else:
+        data_df = data_df.append(adico, ignore_index=True)
     # to gas list
     append_from_dico(adico, gaslist=gas_list, gasvisu=gas_visu)
 
