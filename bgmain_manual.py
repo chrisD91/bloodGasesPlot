@@ -11,6 +11,7 @@ import faulthandler
 from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
@@ -20,6 +21,7 @@ from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QWidget
 
 
 # from bloodGases import bgplot as bg
+
 # from . import bgplot
 import bgplot
 
@@ -110,7 +112,9 @@ paths_b = build_path()
 # spec='horse', hb=12, fio2=0.21, po2=95, ph=7.4, pco2=40, hco3=24, etco2=38
 
 
-def append_from_dico(dico, gaslist=None, gasvisu=None):
+def append_from_dico(
+    dico: dict, gaslist: list = None, gasvisu: dict = None
+) -> Tuple[list, dict]:
     """
     manual entries for blood gases values :
         - create a new Gas obj
@@ -147,7 +151,7 @@ def append_from_dico(dico, gaslist=None, gasvisu=None):
     return gaslist, gasvisu
 
 
-def userinput_to_dico():
+def userinput_to_dico() -> dict:
     """
     user input for blood gases
     return a dictionary
@@ -197,7 +201,7 @@ faulthandler.enable()
 app = QApplication(sys.argv)
 
 
-def choosefile_gui(dirname=None):
+def choosefile_gui(dirname: str = None) -> str:
     """Select a file via a dialog and return the (full) filename.
 
     parameters
@@ -233,7 +237,7 @@ def choosefile_gui(dirname=None):
     return str(fname)
 
 
-def csv_to_df(filename):
+def csv_to_df(filename: str) -> pd.DataFrame:
     """
     append new gases from a csvFile
     input : csvFile, delimiter = tab, oneLine per gas
@@ -259,7 +263,7 @@ def csv_to_df(filename):
     for item in key_list:
         if item not in df.columns:
             print(item, "is missing in the file")
-            return
+            return pd.DataFrame()
     # change the NaN by default values
     ref = {
         "spec": "horse",
@@ -280,7 +284,9 @@ def csv_to_df(filename):
     return df
 
 
-def df_append_to_gases(df, gaslist=None, gasvisu=None):
+def df_append_to_gases(
+    df: pd.DataFrame, gaslist: list = None, gasvisu: dict = None
+) -> Tuple[list, dict]:
     """
     Parameters
     ----------
@@ -316,10 +322,10 @@ gas_list, gas_visu = append_from_dico(None)
 
 append = False
 if append:
-    if "filename" not in dir():
-        filename = choosefile_gui(paths_b.data_)
-    df = csv_to_df(filename)
-    gas_list, gas_visu = df_append_to_gases(df, gas_list, gas_visu)
+    if "file_name" not in dir():
+        file_name = choosefile_gui(paths_b.data_)
+    data_df = csv_to_df(file_name)
+    gas_list, gas_visu = df_append_to_gases(data_df, gas_list, gas_visu)
 
 
 #%%%%%%%%%%%%%% append values
@@ -361,10 +367,10 @@ if addgas:
         append_from_dico(in_df.iloc[i].to_dict(), gaslist=gas_list, gasvisu=gas_visu)
 save = False
 if save:
-    filename = os.path.join(
+    file_name = os.path.join(
         paths_b.record_, "anesthRecords", "bloodGases", "bg200816_airline.xlsx"
     )
-    in_df.to_excel(filename)
+    in_df.to_excel(file_name)
 
 
 #%% #%% to plot all the graphs
@@ -373,7 +379,7 @@ if save:
 plt.close("all")
 
 
-def plot_figs(gases, **kwargs):
+def plot_figs(gases: list, **kwargs) -> plt.Figure:
     """
     plot the gases
     Parameters
@@ -500,7 +506,7 @@ def plot_figs(gases, **kwargs):
     return figlist, fignames
 
 
-def print_beamer_include(folder, figlist):
+def print_beamer_include(folder: str, figlist: list):
     """
     print in console the beamer commands to include the generated plots
     input : folder (the path inside the beamer folder)
@@ -574,7 +580,7 @@ if csv:
 plt.close("all")
 
 
-def plot_evol_o2co2(df):
+def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     """
     Parameters
     ----------
@@ -630,7 +636,7 @@ def plot_evol_o2co2(df):
     return fig
 
 
-def plot_acidobas(df):
+def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     """
     Parameters
     ----------
@@ -682,14 +688,14 @@ def plot_acidobas(df):
         else:
             date_format = DateFormatter("%H:%M")
             ax.xaxis.set_major_formatter(date_format)
-    ax.spines["bottom"].set_color("tab:gray")
-    ax.tick_params(axis="x", colors="tab:gray")
+        ax.spines["bottom"].set_color("tab:gray")
+        ax.tick_params(axis="x", colors="tab:gray")
     ax1.spines["right"].set_visible(False)
     fig.tight_layout()
     return fig
 
 
-def plot_metabo(df):
+def plot_metabo(df: pd.DataFrame) -> plt.Figure:
     """
     Parameters
     ----------
@@ -742,7 +748,7 @@ def plot_metabo(df):
     return fig
 
 
-def plot_iono(df):
+def plot_iono(df: pd.DataFrame) -> plt.Figure:
     """
     Parameters
     ----------
@@ -822,7 +828,7 @@ def plot_iono(df):
     return fig
 
 
-def plot_hb(df):
+def plot_hb(df: pd.DataFrame) -> plt.Figure:
     """
     Parameters
     ----------
