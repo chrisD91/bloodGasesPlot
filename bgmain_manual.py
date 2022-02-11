@@ -151,7 +151,7 @@ def append_from_dico(
     return gaslist, gasvisu
 
 
-def userinput_to_dico() -> dict:
+def userinput_to_dico():
     """
     user input for blood gases
     return a dictionary
@@ -189,9 +189,10 @@ def userinput_to_dico() -> dict:
             inp = input(k + "(" + str(v) + ") : ") or "0"
         inp = inp.replace(",", ".")
         try:
-            newdico[k] = float(inp)
-        except:
-            newdico[k] = inp
+            value = float(inp)
+            newdico[k] = value
+        except ValueError:
+            newdico[k] = str(inp)
     print(newdico)
     return newdico
 
@@ -472,7 +473,7 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
     ident = params["ident"]
     save = params["save"]
     pyplot = params["pyplot"]
-    num = params["num"]
+    num = int(params["num"])  # :int
     name = params.get("name", None)
     for func in func_list:
         if func.__name__ == "plot_cascO2Lin":
