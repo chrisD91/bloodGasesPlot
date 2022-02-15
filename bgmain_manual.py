@@ -8,16 +8,17 @@ for manual use of the plotting
 import os
 import sys
 import faulthandler
-from importlib import reload
+
+# from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
-from typing import Tuple
+from typing import Tuple, Any, List, Dict, Callable
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import numpy as np
 import pandas as pd
-from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QWidget
+from PyQt5.QtWidgets import QApplication, QFileDialog
 
 
 # from bloodGases import bgplot as bg
@@ -25,22 +26,25 @@ from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QWidget
 # from . import bgplot
 import bgplot
 
+
 # ------------------------------------------
+class Bunch(dict):
+    """Bunch classical Bunch class"""
+
+    # def __init__(self, **kwds):
+    #     super().__init__(**kwds)
+    #     self.__dict__ = self
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
 
 # buiding the paths_b
-def build_path():
+def build_path() -> Any:
     """
     build variable paths_b (Bunch class),
     attributes: locations (root, data, record, save, pict)
     """
-
-    class Bunch(dict):
-        """Bunch classical Bunch class"""
-
-        def __init__(self, **kwds):
-            super().__init__(**kwds)
-            self.__dict__ = self
 
     paths_bunch = Bunch()
     root = "~"
@@ -80,7 +84,7 @@ def build_path():
     return paths_bunch
 
 
-def append_anesth_plot_path(paths_bunch):
+def append_anesth_plot_path(paths_bunch) -> None:
     """anesthPlot module"""
     base = ["pg", "chrisPg", "enva", "spyder", "record"]
     base.insert(0, paths_bunch.root_)
@@ -88,18 +92,18 @@ def append_anesth_plot_path(paths_bunch):
     # change the working directory
     if mod_path not in sys.path:
         sys.path.append(mod_path)
-        print("added {} to the path".format(mod_path))
+        print(f"added {mod_path} to the path")
     os.chdir(mod_path)
 
 
-def append_blood_gases_path(paths_bunch):
+def append_blood_gases_path(paths_bunch) -> None:
     """bloodgases"""
     base = ["pg", "chrisPg", "enva", "spyder", "bg"]
     base.insert(0, paths_bunch.root_)
     mod_path = os.path.expanduser(os.path.join(*base))
     if mod_path not in sys.path:
         sys.path.append(mod_path)
-        print("added {} to the path".format(mod_path))
+        print(f"added {mod_path} to the path")
 
 
 paths_b = build_path()
@@ -129,10 +133,10 @@ def append_from_dico(
     """
     if gaslist is None:
         gaslist = []
-        print("{} builded new gaslist".format("-" * 20))
+        print(f"{'-' * 20} builded new gaslist")
     if gasvisu is None:
         gasvisu = {}
-        print("{} builded new gasvisu".format("-" * 20))
+        print(f"{'-' * 20} builded new gasvisu")
     if dico is None:
         # key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
         dico = dict(
@@ -143,15 +147,15 @@ def append_from_dico(
     gaslist.append(gas)
     name = "g" + str(len(gaslist) - 1)
     gasvisu[name] = gas.__dict__
-    print("{} added a new gas from dico".format("-" * 15))
+    print(f"{'-' * 15} added a new gas from dico")
     for k, v in dico.items():
-        print("{:>6s}= {}".format(k, v))
+        print(f"{k:>6s}= {v}")
 
-    print("{} gaslist contains {} gases".format("-" * 20, len(gasvisu)))
+    print(f"{'-' * 20} gaslist contains {len(gasvisu)} gases")
     return gaslist, gasvisu
 
 
-def userinput_to_dico():
+def userinput_to_dico() -> Dict[str, Any]:
     """
     user input for blood gases
     return a dictionary
@@ -159,7 +163,7 @@ def userinput_to_dico():
     date = strftime("%y:%m:%d", localtime())
     heure = strftime("%H:%M", localtime())
 
-    full_dico = {
+    full_dico: Dict[str, Any] = {
         "date": date,
         "heure": heure,
         "spec": "horse",
@@ -180,7 +184,7 @@ def userinput_to_dico():
     }
 
     print("type the value and validate")
-    newdico = {}
+    newdico: Dict[str, Any] = {}
     for k, v in full_dico.items():
         if k in ["date", "heure", "spec", "name"]:
             # default value
@@ -277,7 +281,7 @@ def csv_to_df(filename: str) -> pd.DataFrame:
         "etco2": 38,
     }
     for col in df.columns:
-        if col in ref.keys():
+        if col in ref:
             if df[col].hasnans:
                 print("there are missing values in ", col)
                 print("they will be replaced by ", ref[col])
@@ -313,7 +317,7 @@ def df_append_to_gases(
             df.iloc[i].to_dict(), gaslist=gaslist, gasvisu=gasvisu
         )
     print("_" * 15)
-    print("added {} gases to the gas list".format(i))
+    print(f"added {i} gases to the gas list")
     return gaslist, gasvisu
 
 
@@ -336,7 +340,7 @@ addgas = False
 if addgas:
     # manual input
     adico = userinput_to_dico()
-    if not "data_df" in dir():
+    if "data_df" not in dir():
         data_df = pd.DataFrame(adico, index=[0])
     else:
         data_df = data_df.append(adico, ignore_index=True)
@@ -403,7 +407,7 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
 
     """
     # print(kwargs)
-    params = {
+    params: Dict[str, Any] = {
         "key": "clin",
         "num": 1,
         "reverse": True,
@@ -416,7 +420,7 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
     }
     params.update(kwargs)
     # functions list
-    plot_dico = {
+    plot_dico: Dict[str, List[Callable]] = {
         "all": [
             bgplot.display,
             bgplot.morpion,
@@ -455,18 +459,18 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
         # reverse the order of the display
         for kind in ["all", "clin"]:
             plot_dico[kind] = plot_dico[kind][::-1]
-    key = params["key"]
-    if key in plot_dico.keys():
+    key = params["key"]  # 'all' or 'key'
+    if key in plot_dico:
         # clin or all
         func_list = plot_dico[key]
     else:
         # direct call
-        allNames = [func.__name__ for func in plot_dico["all"]]
-        if key in allNames:
+        all_names = [func.__name__ for func in plot_dico["all"]]
+        if key in all_names:
             func_list = [func for func in plot_dico["all"] if func.__name__ == key]
         else:
-            print("key shoud be in ", allNames)
-            return
+            print("key shoud be in ", all_names)
+            return plt.Figure()
     figlist = []
     fignames = []
     path = params["path"]
@@ -507,7 +511,7 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
     return figlist, fignames
 
 
-def print_beamer_include(folder: str, figlist: list):
+def print_beamer_include(folder: str, figlist: list) -> None:
     """
     print in console the beamer commands to include the generated plots
     input : folder (the path inside the beamer folder)
@@ -536,7 +540,7 @@ def print_beamer_include(folder: str, figlist: list):
 # path = ''
 # folder = 'bg/'    # location in the beamer folder
 
-varDico = {
+varDico: Dict[str, Any] = {
     "key": "clin",
     "num": 1,  # gas number (0 = ref, first=1)
     # num = len(gases) - 1
