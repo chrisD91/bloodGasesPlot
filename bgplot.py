@@ -5,11 +5,14 @@ Created on Tue Feb 16 15:26:14 2016
 @author: cdesbois
 """
 import os
-import numpy as np
+from typing import List, Dict, Any
+
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib import rcParams
 from matplotlib.ticker import FormatStrFormatter
+import numpy as np
+import pandas as pd
 
 rcParams.update({"font.size": 18, "font.family": "serif"})
 
@@ -37,7 +40,7 @@ class Gas:
     """
 
     # to store the gasesObj
-    gasesGasList: list = []
+    gasesGasList: List = []
 
     #     def __init__(self, spec='horse', hb=12, fio2=0.21, po2=95, ph=7.4,
     #                  pco2=40, hco3=24, etco2=38):
@@ -68,31 +71,34 @@ class Gas:
         Gas.gasesGasList.append(self)
 
     @classmethod
-    def return_gasList(objList):
+    def return_gasList(cls) -> List:
         return Gas.gasesGasList
 
     # to be able to print values
     def __str__(self):
-        return (
-            self.spec
-            + +" hb="
-            + str(self.hb)
-            + +" fio2="
-            + str(self.fio2)
-            + +" po2="
-            + str(self.po2)
-            + "\n"
-            + +" ph="
-            + str(self.ph)
-            + +" pco2"
-            + str(self.pco2)
-            + +" hco3"
-            + str(self.hco3)
-            + +" etco2"
-            + str(self.etco2)
-        )
+        txt1 = f"species={self.spec} hb={self.hb} fio2={self.fio2} po2=self.po2)"
+        txt2 = f"ph={self.ph} pco2={self.pco2} hco3={self.hco3} etco2={self.etco2}"
+        return f"{txt1} \n {txt2}"
+        # return (
+        #     self.spec
+        #     + +" hb="
+        #     + str(self.hb)
+        #     + +" fio2="
+        #     + str(self.fio2)
+        #     + +" po2="
+        #     + str(self.po2)
+        #     + "\n"
+        #     + +" ph="
+        #     + str(self.ph)
+        #     + +" pco2"
+        #     + str(self.pco2)
+        #     + +" hco3"
+        #     + str(self.hco3)
+        #     + +" etco2"
+        #     + str(self.etco2)
+        # )
 
-    def casc(self):
+    def casc(self) -> List[float]:
         """
         compute the O2 cascade
         return a list (pinsp, paerien, pAo2 and paO2)
@@ -111,7 +117,7 @@ class Gas:
         casc.append(self.po2)
         return casc
 
-    def piecasc(self):
+    def piecasc(self) -> List[Dict]:
         """
         return oxygen cascade values (%),
         input params = fio2 (0.), paco2 (mmHg) pao2 (mmHg)
@@ -147,26 +153,30 @@ class Gas:
 
 # ==============================================================================
 # data du fit de la fonction de Hill
-def satFit(species):
+def satFit(species: str) -> Dict[str, Any]:
     """
     return satcurv hill function caracteristics
     input : species (horse, dog, cat, human)
     output : dictionary (base, max, rate, xhalf)
     """
-    sat_curv = {}
-    sat_curv["id"] = ["horse", "dog", "cat", "human"]
+    species_list = ["horse", "dog", "cat", "human"]
+    if species not in species_list:
+        print(f"species should be in {species_list}")
+    sat_curv: Dict[str, List[Any]] = {}
+    sat_curv["id"] = species_list
     # sat_curv['horse'] = ([2, 99.427, 2.7, 23.8])
     sat_curv["base"] = [2, 6.9, 0, 0]
     sat_curv["max"] = [99.427, 100, 100, 100]
     sat_curv["rate"] = [2.7, 2.8, 2, 2.8]
     sat_curv["xhalf"] = [23.8, 33.3, 0, 0]
 
-    sat_param = sat_curv.copy()
-    item = sat_curv["id"].index(species)
-    for key in sat_curv.keys():
-        sat_param[key] = sat_curv[key][item]
-    return sat_param
+    hillparams_df = pd.DataFrame(sat_curv).set_index("id").T
+    hillparams = hillparams_df[species].to_dict()
 
+    return hillparams
+
+
+# TODO check with previous values
 
 # fit Hill fonction:
 # r$ fit = base + \frac{max-base}{(1 + (\frac{xhalf}{x})^{rate})} $
@@ -183,7 +193,9 @@ def satFit(species):
 #    	xhalf	=33.263 ± 0.037
 
 # --------------------------------------
-def satHbO2(species, po2):  # species = horse or dog or cat or human
+def satHbO2(
+    species: str, po2: float
+) -> float:  # species = horse or dog or cat or human
     """
     return the satHbO2 value
     input : species (horse, dog, cat, human), PO2
@@ -191,16 +203,16 @@ def satHbO2(species, po2):  # species = horse or dog or cat or human
     """
     #    species = mes['species']
     #    po2 = mes['po2']
-    satParam = satFit(species)
-    sat = satParam["base"] + (satParam["max"] - satParam["base"]) / (
-        1 + ((satParam["xhalf"] / po2) ** satParam["rate"])
+    hill_params = satFit(species)
+    sat = hill_params["base"] + (hill_params["max"] - hill_params["base"]) / (
+        1 + ((hill_params["xhalf"] / po2) ** hill_params["rate"])
     )
     # if (sat > 100):
     #  sat = 100
     return sat
 
 
-def caO2(species, hb, po2):
+def caO2(species: str, hb: float, po2: float) -> float:
     """
     return the CaO2 value
     input : species (horse, dog, cat, human), PO2
@@ -214,7 +226,14 @@ def caO2(species, hb, po2):
 
 
 #%%
-def plot_acidbas(gases, num, path, ident="", save=False, pyplot=False):
+def plot_acidbas(
+    gases: list,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot acid-base
     input :
@@ -263,7 +282,7 @@ def plot_acidbas(gases, num, path, ident="", save=False, pyplot=False):
             transform=ax.transAxes,
             backgroundcolor="w",
         )
-    txt = "acid {} alcalin".format(("-" * 76))
+    txt = f"acid {'-' * 76} alcalin"
     fig.suptitle(txt, color="tab:gray")
     ax = axes[0]
     ax.xaxis.set_major_formatter(FormatStrFormatter("%.2f"))
@@ -335,7 +354,14 @@ def plot_acidbas(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def display(gases, num, path, ident="", save=False, pyplot=False):
+def display(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot a display pf the gas values
     in:
@@ -344,9 +370,9 @@ def display(gases, num, path, ident="", save=False, pyplot=False):
         path = pathn to save the figure
         ident= identification of the gas (to save it)
     """
-    title = "mesured values"
+    # title = "mesured values"
     gasKey = ["num", "spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
-    usualVal = {}
+    usualVal: Dict[str, Any] = {}
     if len(gases) == 1:
         used_num = 0  # only reference
     else:
@@ -399,7 +425,7 @@ def display(gases, num, path, ident="", save=False, pyplot=False):
 
 
 #%%------------------------------------
-def phline(val):
+def phline(val: float) -> List[str]:
     """
     return a list containing the morpion display for pH
     """
@@ -422,7 +448,7 @@ def phline(val):
     return arrow
 
 
-def co2line(val):
+def co2line(val: float) -> List[str]:
     """
     return a list containing the morpion display for co2
     """
@@ -441,7 +467,7 @@ def co2line(val):
     return arrow
 
 
-def hco3line(val):
+def hco3line(val: float) -> List[str]:
     """
     return a list containing the morpion display for hco3-
     """
@@ -460,7 +486,14 @@ def hco3line(val):
     return arrow
 
 
-def morpion(gases, num, path, ident="", save=False, pyplot=False):
+def morpion(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+):
     """
     plot a 'morpion like' display
     input :
@@ -517,7 +550,14 @@ def morpion(gases, num, path, ident="", save=False, pyplot=False):
 
 
 #%%
-def plot_o2(gases, num, path, ident="", save=False, pyplot=False):
+def plot_o2(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot O2
     input :
@@ -585,7 +625,14 @@ def plot_o2(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def plot_ventil(gases, num, path, ident="", save=False, pyplot=False):
+def plot_ventil(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot ventil
     input :
@@ -688,7 +735,15 @@ def plot_ventil(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def plot_pieCasc(gases, num, path, ident="", save=False, pcent=True, pyplot=False):
+def plot_pieCasc(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pcent: bool = True,
+    pyplot: bool = False,
+):
     # fio2=0.21, paco2=40
     """
     pie charts or gas % content,
@@ -716,7 +771,7 @@ def plot_pieCasc(gases, num, path, ident="", save=False, pcent=True, pyplot=Fals
     for d in val:
         if any(np.isnan(x) for x in d.values()):
             print("plot_pieCas, some values are Nan : aborted")
-            return
+            return plt.figure()
 
     if pyplot:
         fig = plt.figure(figsize=(14, 6))  # (figsize=(14, 3))
@@ -773,7 +828,14 @@ def plot_pieCasc(gases, num, path, ident="", save=False, pcent=True, pyplot=Fals
 
 
 # ----------------------------------------------
-def plot_cascO2(gases, nums, path, ident="", save=False, pyplot=False):
+def plot_cascO2(
+    gases: List,
+    nums: list,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+):
     """
     plot the O2 cascade
     input :
@@ -800,7 +862,7 @@ def plot_cascO2(gases, nums, path, ident="", save=False, pyplot=False):
 
     fig.suptitle(
         r"$Palv_{0_2} = Finsp_{O_2}*((P_{atm} - P_{H_2O}) - Pa_{CO_2}/Q_r)$"
-        " avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $",
+        r" avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $",
         fontsize=14,
         color=("tab:gray"),
     )
@@ -809,7 +871,7 @@ def plot_cascO2(gases, nums, path, ident="", save=False, pyplot=False):
     ind = np.arange(4)  # class histo (insp-aerien-alveolaire-artériel)
     width = 0.2  # distance entre les plots
     for i, (k, item) in enumerate(values.items()):
-        label = "g {}".format(str(int(k)))
+        label = f"g{str(int(k))}"
         if k == 0:
             label = "ref"
         ax.bar(
@@ -851,11 +913,17 @@ def plot_cascO2(gases, nums, path, ident="", save=False, pyplot=False):
             name = os.path.join(path, (str(ident) + "cascO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
-    else:
-        return fig
+    return fig
 
 
-def plot_cascO2Lin(gases, nums, path, ident="", save=False, pyplot=False):
+def plot_cascO2Lin(
+    gases: List,
+    nums: list,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot the O2 cascade
     input :
@@ -885,7 +953,7 @@ def plot_cascO2Lin(gases, nums, path, ident="", save=False, pyplot=False):
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
     for i, (k, val) in enumerate(values.items()):
-        label = "gas {}".format(int(k))
+        label = f"gas {int(k)}"
         if k == 0:
             label = "ref"
         ax.plot(val, "o-.", label=label, linewidth=2, ms=10, alpha=0.8)
@@ -900,7 +968,7 @@ def plot_cascO2Lin(gases, nums, path, ident="", save=False, pyplot=False):
     ax.tick_params(colors="tab:gray")
     ax.legend()
     st1 = r"$Palv_{0_2} = Finsp_{O_2}*((P_{atm} - P_{H_2O}) - Pa_{CO_2}/Q_r)$"
-    st2 = " avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $"
+    st2 = r" avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $"
     ax.text(0, 50, st1 + st2, fontsize=14, alpha=0.6)
     try:
         for lst in values:
@@ -920,7 +988,14 @@ def plot_cascO2Lin(gases, nums, path, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def plot_GAa(gases, num, path, ident="", save=False, pyplot=False):
+def plot_GAa(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot alveolo-arterial gradiant
     input :
@@ -977,7 +1052,14 @@ def plot_GAa(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def plot_ratio(gases, num, savepath, ident="", save=False, pyplot=False):
+def plot_ratio(
+    gases: List,
+    num: int,
+    savepath: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+):
     """
     plot ratio O2insp / PaO2
     input :
@@ -1069,7 +1151,9 @@ def plot_ratio(gases, num, savepath, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def plot_GAaRatio(gases, num, savepath, ident="", save=False, pyplot=False):
+def plot_GAaRatio(
+    gases: List, num: int, savepath: str, ident="", save=False, pyplot=False
+):
     """
     plot alveolo-arterial gradiant
     input :
@@ -1185,7 +1269,9 @@ def plot_GAaRatio(gases, num, savepath, ident="", save=False, pyplot=False):
 
 
 # ------------------------------------
-def plot_RatioVsFio2(mes, savepath, ident="", save=False, pyplot=False):
+def plot_RatioVsFio2(
+    mes: Dict, savepath: str, ident: str = "", save: bool = False, pyplot: bool = False
+):
     """
     plot ratio vs FIO2
     input :
@@ -1237,12 +1323,18 @@ def plot_RatioVsFio2(mes, savepath, ident="", save=False, pyplot=False):
             name = os.path.join(savepath, (str(ident) + "ratioVsFio2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
-    else:
-        return fig
+    return fig
 
 
 # --------------------------------------
-def plot_satHb(gases, num, path, ident="", save=False, pyplot=False):
+def plot_satHb(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+):
     """
     plot ratio vs FIO2
     input :
@@ -1291,7 +1383,7 @@ def plot_satHb(gases, num, path, ident="", save=False, pyplot=False):
     #    st = "$Pa_{O_2}$ = "+ str(paO2)+ " mmHg"+ "\n"+ "$SatHb_{O_2}$ = " \
     #    + "{:.1f}".format(sat)+" %"
     st1 = "$Pa_{O_2}$ = " + str(paO2) + " mmHg"
-    st2 = "$SatHb_{O_2}$ = " + "{:.1f}".format(sat) + " %"
+    st2 = "$SatHb_{O_2}$' = " + f"{sat:.1f}%"
     ax.text(100, 80, st1 + "\n" + st2, color="tab:gray")
     ax.set_ylabel("satHb (%)", color="tab:grey")
     ax.set_xlabel(r"$P_{O_2}$ (mmHg)", color="tab:gray")
@@ -1313,7 +1405,14 @@ def plot_satHb(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # --------------------------------------
-def plot_CaO2(gases, num, path, ident="", save=False, pyplot=False):
+def plot_CaO2(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+):
     """
     plot CaO2
     input :
@@ -1380,7 +1479,14 @@ def plot_CaO2(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # --------------------------------------
-def plot_varCaO2(gases, num, path, ident="", save=False, pyplot=False):
+def plot_varCaO2(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+):
     """
     plot CaO2 and CaO2 variation (slope)
     input :
@@ -1410,7 +1516,7 @@ def plot_varCaO2(gases, num, path, ident="", save=False, pyplot=False):
         fig = plt.figure(figsize=(10, 8))
     else:
         fig = Figure(figsize=(10, 8))
-    st = species + " ( $SatHb_{O_2} \ et \ \Delta SatHb_{O_2}$)"
+    st = species + r" ( $SatHb_{O_2} \ et \ \Delta SatHb_{O_2}$)"
     fig.suptitle(st, fontsize=24, backgroundcolor="w", color="tab:gray")
 
     ax1 = fig.add_subplot(111)  # ax1
@@ -1462,7 +1568,14 @@ def plot_varCaO2(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # --------------------------------------
-def plot_hbEffect(gases, num, path, ident="", save=False, pyplot=False):
+def plot_hbEffect(
+    gases: List,
+    num: int,
+    path: str,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = False,
+) -> plt.Figure:
     """
     plot CaO2 for several Hb contents
     input :
@@ -1505,7 +1618,7 @@ def plot_hbEffect(gases, num, path, ident="", save=False, pyplot=False):
     ax.plot([paO2, paO2], [0, contO2], "tab:gray", linewidth=1)
     ax.plot(paO2, contO2, "o-", color="tab:red", markersize=22, alpha=0.8)
     ax.set_ylabel(r"$Ca_{O_2} (ml/l)$", color="tab:gray")
-    ax.set_xlabel("$P_{O_2} \ (mmHg)$", color="tab:gray")
+    ax.set_xlabel(r"$P_{O_2} \ (mmHg)$", color="tab:gray")
     ax.axes.tick_params(colors="tab:gray")
     ax.set_xlim([10, O2max])
     # ax.grid()
@@ -1522,7 +1635,9 @@ def plot_hbEffect(gases, num, path, ident="", save=False, pyplot=False):
 
 
 # --------------------------------------
-def plot_satHorseDog(savepath, ident="", save=False, pyplot=False):
+def plot_satHorseDog(
+    savepath: str, ident: str = "", save: bool = False, pyplot: bool = False
+) -> plt.Figure:
     """
     plot satHb horse and dog
     input : none
@@ -1558,23 +1673,23 @@ def plot_satHorseDog(savepath, ident="", save=False, pyplot=False):
             name = os.path.join(savepath, (str(ident) + "satHorseDog"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
-    else:
-        return fig
+    return fig
 
 
 # -----------------------------------------------------------------------------
 import matplotlib.image as mpimg
 
 
-def showPicture(files=[None], folderPath="~", title=""):
+def showPicture(files: List[str], folderPath: str = "~", title: str = ""):
     """
     to include a picture
     """
+
     folderPath = os.path.expanduser(folderPath)
     file = os.path.join(folderPath, files[0])
     if not os.path.isfile(file):
         print("file doesn't exist", file)
-        return
+        return plt.Figure()
     fig = plt.figure(figsize=(12, 6))
     fig.suptitle(title)
     if len(files) == 1:
@@ -1601,11 +1716,11 @@ def showPicture(files=[None], folderPath="~", title=""):
         return fig
     else:
         print("can only plot two images")
-        return
+    return fig
 
 
 # -----------------------------------------------------------------------------
-def saveGraph(path, ext="png", close=True, verbose=True):
+def saveGraph(path: str, ext: str = "png", close: bool = True, verbose: bool = True):
     """Save a figure from pyplot.
     Parameters
     ----------
@@ -1627,7 +1742,7 @@ def saveGraph(path, ext="png", close=True, verbose=True):
     """
     # Extract the directory and filename from the given path
     directory = os.path.split(path)[0]
-    filename = "%s.%s" % (os.path.split(path)[1], ext)
+    filename = os.path.split(path)[1] + "." + ext.strip(".")
     if directory == "":
         directory = "."
     # If the directory does not exist, create it
@@ -1636,7 +1751,7 @@ def saveGraph(path, ext="png", close=True, verbose=True):
     # The final path to save to
     savepath = os.path.join(directory, filename)
     if verbose:
-        print("Saving figure to '%s'..." % savepath),
+        print(f"Saving figure to {savepath} ..."),
     # Actually save the figure
     plt.savefig(savepath)
     # Close it
