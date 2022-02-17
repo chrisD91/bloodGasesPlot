@@ -42,21 +42,6 @@ class Gas:
     # to store the gasesObj
     gasesGasList: List = []
 
-    #     def __init__(self, spec='horse', hb=12, fio2=0.21, po2=95, ph=7.4,
-    #                  pco2=40, hco3=24, etco2=38):
-    #         self.spec = spec
-    #         self.hb = hb
-    #         if fio2 > 1:
-    #             fio2 = fio2/100
-    #         self.fio2 = fio2
-    #         self.po2 = po2
-    #         self.ph = ph
-    #         self.pco2 = pco2
-    #         self.hco3 = hco3
-    #         self.etco2 = etco2
-    #         Gas.gasesGasList.append(self)
-    # #        self.casc = []
-
     def __init__(self, **kwargs):
         self.spec = kwargs.get("spec", "horse")
         self.hb = kwargs.get("hb", 12)
@@ -79,24 +64,6 @@ class Gas:
         txt1 = f"species={self.spec} hb={self.hb} fio2={self.fio2} po2=self.po2)"
         txt2 = f"ph={self.ph} pco2={self.pco2} hco3={self.hco3} etco2={self.etco2}"
         return f"{txt1} \n {txt2}"
-        # return (
-        #     self.spec
-        #     + +" hb="
-        #     + str(self.hb)
-        #     + +" fio2="
-        #     + str(self.fio2)
-        #     + +" po2="
-        #     + str(self.po2)
-        #     + "\n"
-        #     + +" ph="
-        #     + str(self.ph)
-        #     + +" pco2"
-        #     + str(self.pco2)
-        #     + +" hco3"
-        #     + str(self.hco3)
-        #     + +" etco2"
-        #     + str(self.etco2)
-        # )
 
     def casc(self) -> List[float]:
         """
@@ -107,13 +74,9 @@ class Gas:
         patm = 760
         casc = []
         # casc = ([pinsp, paerien, pAo2, pao2])
-        # casc['pinsp'] = self.fio2 * patm
         casc.append(self.fio2 * patm)
-        # casc['paerien'] = self.fio2 * (patm - ph2o)
         casc.append(self.fio2 * (patm - ph2o))
-        # casc['pAo2'] = self.fio2 * (patm - ph2o) - self.po2
         casc.append(self.fio2 * (patm - ph2o) - self.pco2 / 0.8)
-        # casc['pao2'] = self.po2
         casc.append(self.po2)
         return casc
 
@@ -144,20 +107,21 @@ class Gas:
         return pieCas
 
 
-# NB to copy an object use
-# import copy
-# then newObj = copy.copy(obj)
-
-# to copy obj and embeded references:
-# newObj = copy.deepcopy(obj)
-
 # ==============================================================================
-# data du fit de la fonction de Hill
+# hill function parameters
 def satFit(species: str) -> Dict[str, Any]:
     """
-    return satcurv hill function caracteristics
-    input : species (horse, dog, cat, human)
-    output : dictionary (base, max, rate, xhalf)
+    return hill function parameters to be able to rebuild saturation curve
+    Parameters
+    ----------
+    species : str
+        species in ["horse", "dog", "cat", "human"]
+
+    Returns
+    -------
+    Dict[str, Any]
+        keys are 'base', 'max', 'rate', 'xhalf'
+
     """
     species_list = ["horse", "dog", "cat", "human"]
     if species not in species_list:
@@ -236,14 +200,27 @@ def plot_acidbas(
 ) -> plt.Figure:
     """
     plot acid-base
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : TYPE
+        plt.Figure or matplotlib.Figure
+
     """
     if num > 1:
         gas = gases[num]
@@ -364,11 +341,27 @@ def display(
 ) -> plt.Figure:
     """
     plot a display pf the gas values
-    in:
-        gases = list of gas obj,
-        num=number in the list,
-        path = pathn to save the figure
-        ident= identification of the gas (to save it)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : TYPE
+        plt.Figure or matplotlib.Figure
+
     """
     # title = "mesured values"
     gasKey = ["num", "spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
@@ -428,7 +421,19 @@ def display(
 def phline(val: float) -> List[str]:
     """
     return a list containing the morpion display for pH
+
+    Parameters
+    ----------
+    val : float
+        the pH value.
+
+    Returns
+    -------
+    List[str]
+        the signs to use for the morpion display.
+
     """
+
     ref = [7.2, 7.35, 7.45, 7.5]
     # base
     arrow = ["-", "-", "-"]
@@ -450,7 +455,18 @@ def phline(val: float) -> List[str]:
 
 def co2line(val: float) -> List[str]:
     """
-    return a list containing the morpion display for co2
+    return a list containing the morpion display for CO2
+
+    Parameters
+    ----------
+    val : float
+        the co2 value.
+
+    Returns
+    -------
+    List[str]
+        the signs to use for the morpion display.
+
     """
     ref = [60, 42, 38, 30]  # NB data are presented in acid , norm, basic order
     arrow = ["-", "–", "-"]
@@ -470,6 +486,17 @@ def co2line(val: float) -> List[str]:
 def hco3line(val: float) -> List[str]:
     """
     return a list containing the morpion display for hco3-
+
+    Parameters
+    ----------
+    val : float
+        the hco3- value.
+
+    Returns
+    -------
+    List[str]
+        the signs to use for the morpion display.
+
     """
     ref = [14, 22, 26, 32]
     arrow = ["-", "–", "-"]
@@ -496,15 +523,26 @@ def morpion(
 ):
     """
     plot a 'morpion like' display
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
 
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : TYPE
+        plt.Figure or matplotlib.Figure
     """
     gas = gases[num - 1]
     title = (
@@ -560,14 +598,26 @@ def plot_o2(
 ) -> plt.Figure:
     """
     plot O2
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : TYPE
+        plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -635,14 +685,26 @@ def plot_ventil(
 ) -> plt.Figure:
     """
     plot ventil
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : TYPE
+        plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -747,15 +809,26 @@ def plot_pieCasc(
     # fio2=0.21, paco2=40
     """
     pie charts or gas % content,
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pcent : boolean (output in '%' or mmHg)
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : TYPE
+        plt.Figure or matplotlib.Figure
     """
     titles = ["inspiré", "aérien", "alvéolaire"]
     explodes = [[0.1, 0], [0, 0, 0.3], [0, 0, 0, 0.3]]
@@ -838,14 +911,26 @@ def plot_cascO2(
 ):
     """
     plot the O2 cascade
-    input :
-        gases = list of bg.Gas,
-        nums = list of locations in the gasList
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : histogram plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
+        histogram
     """
     # ref
     if 0 not in nums:
@@ -926,14 +1011,25 @@ def plot_cascO2Lin(
 ) -> plt.Figure:
     """
     plot the O2 cascade
-    input :
-        gases = list of bg.Gas,
-        nums = list of locations in the gasList
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : histogram plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     # ref
     if 0 not in nums:
@@ -998,14 +1094,25 @@ def plot_GAa(
 ) -> plt.Figure:
     """
     plot alveolo-arterial gradiant
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
+
     """
     if len(gases) > 1:
         casc = gases[num].casc()
@@ -1062,14 +1169,26 @@ def plot_ratio(
 ):
     """
     plot ratio O2insp / PaO2
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
+
     """
     if num > 1:
         gas = gases[num]
@@ -1156,14 +1275,25 @@ def plot_GAaRatio(
 ):
     """
     plot alveolo-arterial gradiant
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -1274,14 +1404,25 @@ def plot_RatioVsFio2(
 ):
     """
     plot ratio vs FIO2
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     paO2 = mes["po2"]
     fiO2 = mes["fio2"]
@@ -1337,14 +1478,25 @@ def plot_satHb(
 ):
     """
     plot ratio vs FIO2
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -1415,14 +1567,25 @@ def plot_CaO2(
 ):
     """
     plot CaO2
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -1489,14 +1652,25 @@ def plot_varCaO2(
 ):
     """
     plot CaO2 and CaO2 variation (slope)
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -1578,14 +1752,25 @@ def plot_hbEffect(
 ) -> plt.Figure:
     """
     plot CaO2 for several Hb contents
-    input :
-        gases = list of bg.Gas,
-        num = location in the list
-        path = path to save
-        ident = string to identify in the save name
-        save : boolean
-        pyplot : boolean (True: retrun a pyplot,    else a Figure obj)
-    output : plot (pyplot or FigureObj)
+
+    Parameters
+    ----------
+    gases : list
+        list of bg.Gas objects
+    num : int
+        location in the list.
+    path : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -1640,8 +1825,21 @@ def plot_satHorseDog(
 ) -> plt.Figure:
     """
     plot satHb horse and dog
-    input : none
-    output : plot
+
+    Parameters
+    ----------
+    savepath : str
+        path to save.
+    ident : str, optional (default is "")
+        string to identify in the save name.
+    save : bool, optional (default is False)
+        to save or not to save
+    pyplot : bool, optional (default is False)
+        True: return a pyplot,    else a Figure obj
+
+    Returns
+    -------
+    fig : plt.Figure or matplotlib.Figure
     """
 
     if pyplot:
@@ -1680,11 +1878,24 @@ def plot_satHorseDog(
 import matplotlib.image as mpimg
 
 
-def showPicture(files: List[str], folderPath: str = "~", title: str = ""):
+def showPicture(files: List[str], folderPath: str = "~", title: str = "") -> plt.Figure:
     """
     to include a picture
-    """
 
+    Parameters
+    ----------
+    files : List[str]
+        a list of file names.
+    folderPath : str, optional (default is "~")
+        the directory path
+    title : str, optional (default is "")
+        title to add to the display
+
+    Returns
+    -------
+    plt.Figure
+
+    """
     folderPath = os.path.expanduser(folderPath)
     file = os.path.join(folderPath, files[0])
     if not os.path.isfile(file):
@@ -1751,7 +1962,7 @@ def saveGraph(path: str, ext: str = "png", close: bool = True, verbose: bool = T
     # The final path to save to
     savepath = os.path.join(directory, filename)
     if verbose:
-        print(f"Saving figure to {savepath} ..."),
+        print(f"Saving figure to {savepath} ...")
     # Actually save the figure
     plt.savefig(savepath)
     # Close it

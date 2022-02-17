@@ -102,7 +102,7 @@ def plot_aniongap(**kwargs):
 
     agap = vals["na"] + vals["k"] - vals["cl"] - vals["hco3"]
     ax.annotate(
-        "anion gap {}".format(agap),
+        f"anion gap {agap}",
         xy=(0.5, cations[1] + (yval - cations[1]) / 2),
         xytext=(0.5, -10),
         arrowprops=dict(arrowstyle="fancy"),
@@ -159,4 +159,4 @@ def plot_aniongap(**kwargs):
     return fig
 
 
-fig = plot_aniongap()
+figure = plot_aniongap()
