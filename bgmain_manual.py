@@ -12,10 +12,12 @@ import faulthandler
 # from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
-from typing import Tuple, Any, List, Dict, Callable
+from typing import Tuple, Any, List, Dict, Callable, Set
+from math import floor, ceil
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QFileDialog
@@ -28,15 +30,26 @@ import bgplot
 
 
 # ------------------------------------------
+# class Bunch(dict):
+#     """Bunch classical Bunch class"""
+
+#     # def __init__(self, **kwds):
+#     #     super().__init__(**kwds)
+#     #     self.__dict__ = self
+
+#     def __init__(self, **kwargs):
+#         self.__dict__.update(kwargs)
+
+
 class Bunch(dict):
-    """Bunch classical Bunch class"""
+    def __getattribute__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key)
 
-    # def __init__(self, **kwds):
-    #     super().__init__(**kwds)
-    #     self.__dict__ = self
-
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+    def __setattr__(self, key, value):
+        self[key] = value
 
 
 # buiding the paths_b
@@ -603,8 +616,8 @@ def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     ax.set_ylabel("$Pa 0_2$", color="tab:red")
     usual = [80, 112]
     spread = set(usual) | set(ax.get_ylim())
-    ax.set_ylim(min(spread), max(spread))
-
+    lims = bgplot.round_lims(spread, 5)
+    ax.set_ylim(lims)
     ax.spines["left"].set_color("tab:red")
     ax.tick_params(axis="y", colors="tab:red")
     ax.axhline(90, color="tab:red", linestyle="dashed", alpha=0.4, linewidth=3)
@@ -616,7 +629,9 @@ def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     axT.set_ylabel("$Pa C0_2$", color="tab:blue")
     usual = [36, 46]
     spread = set(usual) | set(axT.get_ylim())
-    axT.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 5)
+    axT.set_ylim(lims)
+    # axT.set_ylim(min(spread), max(spread))
 
     axT.spines["right"].set_color("tab:blue")
     axT.tick_params(axis="y", colors="tab:blue")
@@ -627,7 +642,11 @@ def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     # gas_list = ['gas' + item for item in gas_list]
     for ax in fig.get_axes():
         ax.spines["top"].set_visible(False)
-        # chelck if index is datetime
+        ax.yaxis.set_major_locator(
+            MaxNLocator(integer=True, nbins=5, steps=[1, 2, 5, 10])
+        )
+
+        # check if index is datetime
         if df.index.dtype != "<M8[ns]":
             ax.xaxis.set_ticks(np.arange(len(df)))
             # ax.xaxis.set_ticklabels(gas_list)
@@ -660,16 +679,22 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     ax1.axhspan(7.35, 7.45, alpha=0.3, color="tab:grey")
     usual = [7.34, 7.48]
     spread = set(usual) | set(ax1.get_ylim())
-    ax1.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 0.1)
+    ax1.set_ylim(lims)
+    ax1.yaxis.set_major_locator(
+        MaxNLocator(integer=False, nbins=3, steps=[1, 2, 5, 10])
+    )
 
     ax2 = fig.add_subplot(212)
     ax2.plot(df.pco2, "-o", color="tab:blue", ms=10)
     ax2.set_ylabel("$Pa CO_2$", color="tab:blue")
     usual = [36, 46]
     spread = set(usual) | set(ax2.get_ylim())
-    ax2.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 5)
+    ax2.set_ylim(lims)
     ax2.spines["left"].set_color("tab:blue")
     ax2.tick_params(axis="y", colors="tab:blue")
+    ax2.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3, steps=[1, 2, 5, 10]))
     for spine in ["top", "right"]:
         ax2.spines[spine].set_visible(False)
 
@@ -678,7 +703,9 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     ax3.set_ylabel("$HCO_3$", color="tab:orange")
     usual = [22, 29]
     spread = set(usual) | set(ax3.get_ylim())
-    ax3.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 1)
+    ax3.set_ylim(lims)
+    ax3.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3, steps=[1, 2, 5, 10]))
     ax3.spines["right"].set_color("tab:orange")
     ax3.tick_params(axis="y", colors="tab:orange")
     for spine in ["top", "left"]:
@@ -702,14 +729,15 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
 
 def plot_metabo(df: pd.DataFrame) -> plt.Figure:
     """
+    plot hco3- and anionGap over time
     Parameters
     ----------
-    df : TYPE
-        DESCRIPTION.
+    df : pd.DataFrame
+        the data
 
     Returns
     -------
-    None.
+    None.PLT;fIGURE
     """
     fig = plt.figure(figsize=(8, 4))
     fig.suptitle("métabo", color="tab:gray")
@@ -718,7 +746,9 @@ def plot_metabo(df: pd.DataFrame) -> plt.Figure:
     ax.set_ylabel("$HCO_3$", color="tab:orange")
     usual = [22, 29]
     spread = set(usual) | set(ax.get_ylim())
-    ax.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 1)
+    ax.set_ylim(lims)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3, steps=[1, 2, 5, 10]))
     ax.spines["left"].set_color("tab:orange")
     ax.tick_params(axis="y", colors="tab:orange")
     for spine in ["top", "right"]:
@@ -734,8 +764,9 @@ def plot_metabo(df: pd.DataFrame) -> plt.Figure:
     axT.tick_params(axis="y", colors="tab:cyan")
     usual = [5, 16]
     spread = set(usual) | set(axT.get_ylim())
-    axT.set_ylim(min(spread), max(spread))
-
+    lims = bgplot.round_lims(spread, 2)
+    axT.set_ylim(lims)
+    axT.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3, steps=[1, 2, 5, 10]))
     for spine in ["top", "left"]:
         axT.spines[spine].set_visible(False)
     for ax in fig.get_axes():
@@ -757,12 +788,12 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     """
     Parameters
     ----------
-    df : TYPE
-        DESCRIPTION.
+    df : pandas.DataFrame
+        the values
 
     Returns
     -------
-    None.
+    fig : plt.Figure
 
     """
     fig = plt.figure(figsize=(8, 4))
@@ -774,7 +805,8 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     # ax.hlines(145, *lims, colors='r', alpha=0.5, linestyles='dashed')
     usual = [136, 142]
     spread = set(usual) | set(ax.get_ylim())
-    ax.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 5)
+    ax.set_ylim(lims)
     ax.set_ylabel("$Na^+$", color="tab:red")
     ax.spines["left"].set_color("tab:red")
     ax.tick_params(axis="y", colors="tab:red")
@@ -786,7 +818,8 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     axT.set_ylabel("$Cl^-$", color="tab:blue")
     usual = [98, 104]
     spread = set(usual) | set(axT.get_ylim())
-    axT.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread)
+    axT.set_ylim(lims)
     # lims = axT.get_xlim()
     # axT.hlines(110, *lims, colors='b', alpha=0.5, linestyles='dashed')
     # axT.hlines(95, *lims, colors='b', alpha=0.5, linestyles='dashed')
@@ -800,7 +833,8 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     ax2.set_ylabel("$K^+$", color="tab:purple")
     usual = [2.2, 4]
     spread = set(usual) | set(ax2.get_ylim())
-    ax2.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 1)
+    ax2.set_ylim(lims)
     ax2.spines["left"].set_color("tab:purple")
     ax2.tick_params(axis="y", colors="tab:purple")
     for spine in ["top", "right"]:
@@ -811,7 +845,8 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     ax2T.set_ylabel("pH", color="tab:gray")
     usual = [7.34, 7.48]
     spread = set(usual) | set(ax2T.get_ylim())
-    ax2.set_ylim(min(spread), max(spread))
+    lims = bgplot.round_lims(spread, 0.2)
+    ax2.set_ylim(lims)
     ax2T.spines["right"].set_color("tab:gray")
     ax2T.tick_params(axis="y", colors="tab:gray")
     for spine in ["top", "left"]:
@@ -835,19 +870,26 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
 
 def plot_hb(df: pd.DataFrame) -> plt.Figure:
     """
+    plot hb over time
     Parameters
     ----------
-    df : TYPE
-        DESCRIPTION.
+    df : pd.DataFrame
+        the data.
 
     Returns
     -------
-    None.
+    plt.Figure
     """
     fig = plt.figure(figsize=(8, 4))
     fig.suptitle("Hb", color="tab:gray")
     ax = fig.add_subplot(111)
-    ax.plot(df.hb, "-or", color="tab:red")
+    ax.plot(df.hb, "-o", color="tab:red")
+
+    usual: List[float] = []
+    spread = set(usual) | set(ax.get_ylim())
+    lims = bgplot.round_lims(spread, 1)
+    ax.set_ylim(lims)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3, steps=[1, 2, 5, 10]))
     ax.set_ylabel("Hb", color="tab:red")
     ax.spines["left"].set_color("tab:red")
     ax.tick_params(axis="y", colors="tab:red")

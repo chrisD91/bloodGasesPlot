@@ -5,7 +5,8 @@ Created on Tue Feb 16 15:26:14 2016
 @author: cdesbois
 """
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Set, Tuple
+from math import floor, ceil
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -15,6 +16,29 @@ import numpy as np
 import pandas as pd
 
 rcParams.update({"font.size": 18, "font.family": "serif"})
+
+
+def round_lims(values: Set, round_value: float = 5) -> Tuple:
+    """
+    return a tuple (min, max) of floor-ceil % round_value
+
+    Parameters
+    ----------
+    values : Set
+        contain the axes limits (real and expected).
+    round_value : float, optional(efault is 5)
+        the rounded value desired
+
+    Returns
+    -------
+    Tuple
+        (min, max) to be used
+
+    """
+    mini = floor(min(values) / round_value) * round_value
+    maxi = ceil(max(values) / round_value) * round_value
+    return (mini, maxi)
+
 
 # ==============================================================================
 class Gas:
