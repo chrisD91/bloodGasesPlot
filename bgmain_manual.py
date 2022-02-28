@@ -12,6 +12,7 @@ import faulthandler
 # from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
+import datetime
 from typing import Tuple, Any, List, Dict, Callable, Set
 from math import floor, ceil
 
@@ -122,6 +123,98 @@ def append_blood_gases_path(paths_bunch) -> None:
 paths_b = build_path()
 # append_anesth_plot_path(paths_b)
 # append_blood_gases_path(paths_b)
+
+
+def build_xcel_model(dirname: str = None):
+    """
+    save a generic xlsx file to enter the blood gases data
+
+    Parameters
+    ----------
+    dirname : str, optional (default is None)
+        the directory to save in
+    Returns
+    -------
+    None.
+
+    """
+    base_dico = {
+        "date": {0: "2021-10-20"},
+        "heure": {0: "00:00:00"},
+        "spec": {0: "horse"},
+        "name": {0: "thename"},
+        "num": {0: np.nan},
+        "fio2": {0: np.nan},
+        "etco2": {0: np.nan},
+        "ph": {0: np.nan},
+        "pco2": {0: np.nan},
+        "hco3": {0: np.nan},
+        "anGap": {0: np.nan},
+        "tco2": {0: np.nan},
+        "be": {0: np.nan},
+        "po2": {0: np.nan},
+        "hb": {0: np.nan},
+        "sat": {0: np.nan},
+        "Na": {0: np.nan},
+        "K": {0: np.nan},
+        "Cl": {0: np.nan},
+    }
+    df = pd.DataFrame(base_dico)
+    file = str(datetime.date.today()).replace("-", "_") + "_bg.xlsx"
+    if dirname is None:
+        dirname = "~"
+    filename = os.path.expanduser(os.path.join(dirname, file))
+    df.to_excel(filename)
+    print("builded a generic .xlsx file to enter the data")
+    print(f"{filename=}")
+
+
+def load_xcel_file(bgfilename: str) -> pd.DataFrame:
+    """
+    load the excel file containing the blood gases values
+
+    Parameters
+    ----------
+    bgfilename : the filename
+        fullname
+
+    Returns
+    -------
+    bgdf : pd.DataFrame
+        the data.
+
+    """
+    bgdf = pd.read_excel(bgfilename, parse_dates=[["date", "heure"]]).set_index(
+        "date_heure"
+    )
+    return bgdf
+
+
+def add_o2co2_toBg(bgdf: pd.DataFrame, monitortrend: pd.DataFrame) -> pd.DataFrame:
+    """
+    extract o2 and co2 from a monitorTrend, and fill the bloodgases dataframe
+
+    Parameters
+    ----------
+    bgdf : pd.DataFrame
+        the blood gases values.
+    monitortrend : pd.DataFrame
+        a corresponding monitorTrend record.
+
+    Returns
+    -------
+    bgdf : pd.DataFrame
+        the blood gases values.
+
+    """
+    df = monitortrend.data[["datetime", "o2insp", "co2exp"]].set_index("datetime")
+    tdelta = datetime.timedelta(minutes=3)
+    dt = bgdf.index[1]
+    for dt in bgdf.index:
+        o2insp, co2exp = df.loc[dt - tdelta : dt + tdelta].median()
+        bgdf.loc[dt, ["fio2", "etco2"]] = o2insp, co2exp
+        print(dt, o2insp, co2exp)
+    return bgdf
 
 
 # ----------------------------------------------- end config
