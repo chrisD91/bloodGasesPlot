@@ -8,12 +8,13 @@ for manual use of the plotting
 import os
 import sys
 import faulthandler
+from typing import Optional
+from typing import Tuple, Any, List, Dict, Callable
 
 # from importlib import reload
 from socket import gethostname
 from time import localtime, strftime
 import datetime
-from typing import Tuple, Any, List, Dict, Callable, Set
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
@@ -43,6 +44,8 @@ import bgplot
 
 
 class Bunch(dict):
+    """Create a Bunch class."""
+
     def __getattribute__(self, key):
         try:
             return self[key]
@@ -56,10 +59,12 @@ class Bunch(dict):
 # buiding the paths_b
 def build_path() -> Any:
     """
-    build variable paths_b (Bunch class),
-    attributes: locations (root, data, record, save, pict)
-    """
+    Build variable paths_b (Bunch class).
 
+    return
+    ------
+        bunch, attributes: locations (root, data, record, save, pict)
+    """
     paths_bunch = Bunch()
     root = "~"
     # panaPortableEnva
@@ -99,7 +104,7 @@ def build_path() -> Any:
 
 
 def append_anesth_plot_path(paths_bunch) -> None:
-    """anesthPlot module"""
+    """AnesthPlot module."""
     base = ["pg", "chrisPg", "enva", "spyder", "record"]
     base.insert(0, paths_bunch.root_)
     mod_path = os.path.expanduser(os.path.join(*base))
@@ -111,7 +116,7 @@ def append_anesth_plot_path(paths_bunch) -> None:
 
 
 def append_blood_gases_path(paths_bunch) -> None:
-    """bloodgases"""
+    """Bloodgases."""
     base = ["pg", "chrisPg", "enva", "spyder", "bg"]
     base.insert(0, paths_bunch.root_)
     mod_path = os.path.expanduser(os.path.join(*base))
@@ -127,7 +132,7 @@ paths_b = build_path()
 
 def build_xcel_model(dirname: str = None):
     """
-    save a generic xlsx file to enter the blood gases data
+    Save a generic xlsx file to enter the blood gases data.
 
     Parameters
     ----------
@@ -171,7 +176,7 @@ def build_xcel_model(dirname: str = None):
 
 def load_xcel_file(bgfilename: str) -> pd.DataFrame:
     """
-    load the excel file containing the blood gases values
+    Load the excel file containing the blood gases values.
 
     Parameters
     ----------
@@ -192,7 +197,7 @@ def load_xcel_file(bgfilename: str) -> pd.DataFrame:
 
 def add_o2co2_toBg(bgdf: pd.DataFrame, monitortrend: pd.DataFrame) -> pd.DataFrame:
     """
-    extract o2 and co2 from a monitorTrend, and fill the bloodgases dataframe
+    Extract o2 and co2 from a monitorTrend, and fill the bloodgases dataframe.
 
     Parameters
     ----------
@@ -223,19 +228,27 @@ def add_o2co2_toBg(bgdf: pd.DataFrame, monitortrend: pd.DataFrame) -> pd.DataFra
 
 
 def append_from_dico(
-    dico: dict, gaslist: list = None, gasvisu: dict = None
+    dico: dict, gaslist: Optional[list] = None, gasvisu: Optional[dict] = None
 ) -> Tuple[list, dict]:
     """
-    manual entries for blood gases values :
-        - create a new Gas obj
-        - append it to the gasesList
-        - add a new 'g+nb' in the gasesVDict
+    Manual entries for blood gases values.
 
-    input: dictionary
-    {'spec':, 'hb':, 'fio2':, 'po2':, 'ph':, 'pco2':, 'hco3':, 'etco2':}
+    - create a new Gas obj
+    - append it to the gasesList
+    - add a new 'g+nb' in the gasesVDict
 
+    Parameters
+    ----------
+        dico : dictionary
+            {'spec':, 'hb':, 'fio2':, 'po2':, 'ph':, 'pco2':, 'hco3':, 'etco2':}
+        gaslist : list
+            list of gas objects
+        gasvisu : dict
+            dictionary to visualise gaslist content
 
-    output : append in gaslist and gasvisu
+    Return
+    ------
+        append in gaslist and gasvisu
     """
     if gaslist is None:
         gaslist = []
@@ -263,8 +276,11 @@ def append_from_dico(
 
 def userinput_to_dico() -> Dict[str, Any]:
     """
-    user input for blood gases
-    return a dictionary
+    User input for blood gases.
+
+    Return
+    ------
+    newdico : dict
     """
     date = strftime("%y:%m:%d", localtime())
     heure = strftime("%H:%M", localtime())
@@ -307,7 +323,7 @@ def userinput_to_dico() -> Dict[str, Any]:
     return newdico
 
 
-#%% from file
+# %% from file
 faulthandler.enable()
 app = QApplication(sys.argv)
 
@@ -315,13 +331,13 @@ app = QApplication(sys.argv)
 def choosefile_gui(dirname: str = None) -> str:
     """Select a file via a dialog and return the (full) filename.
 
-    parameters
-    ----
-    dir_path : str
+    Parameters
+    ----------
+    dirname : str
         location to place the gui ('generally paths['data']) else home
 
-    return
-    ----
+    Return
+    ------
     fname[0] : str
         filename
     """
@@ -350,12 +366,19 @@ def choosefile_gui(dirname: str = None) -> str:
 
 def csv_to_df(filename: str) -> pd.DataFrame:
     """
-    append new gases from a csvFile
-    input : csvFile, delimiter = tab, oneLine per gas
-        columns should be :
-        key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
-    append the gases to the lists (gases, gasesV)
-    return a pandasDataFrame
+    Append new gases from a csvFile to gases & gasesV.
+
+    Parameters
+    ----------
+    filename : str
+        paths to csvFile (
+            delimiter = tab, oneLine per gas
+            columns should be :
+                key_list = ['spec', 'hb', 'fio2', 'po2', 'ph', 'pco2', 'hco3', 'etco2']
+
+    Return
+    ------
+        df:  pad.DataFrame
     """
     key_list = ["spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
     # load file as pd.DataFrame
@@ -396,22 +419,26 @@ def csv_to_df(filename: str) -> pd.DataFrame:
 
 
 def df_append_to_gases(
-    df: pd.DataFrame, gaslist: list = None, gasvisu: dict = None
+    df: pd.DataFrame, gaslist: Optional[list] = None, gasvisu: Optional[dict] = None
 ) -> Tuple[list, dict]:
     """
+    Append to gases.
+
     Parameters
     ----------
     df : pandas DataFrame
-        DESCRIPTION.
-    gas_list : list of Gas objects
-        DESCRIPTION.
-    gas_visu : list of __dict__ of Gas Objects
-        DESCRIPTION.
+        the gas data.
+    gas_list : list
+        of Gas objects
+    gas_visu : list
+        of __dict__ of Gas Objects
 
     Returns
     -------
-    gaslist : list of gases objects
-    gasvisu : dico for visualisation
+    gaslist : list
+        of gases objects
+    gasvisu : dict
+        for visualisation
 
     """
     # initialise if empty
@@ -439,7 +466,7 @@ if append:
     gas_list, gas_visu = df_append_to_gases(data_df, gas_list, gas_visu)
 
 
-#%%%%%%%%%%%%%% append values
+# %%%%%%%%%%%%%% append values
 # by user input
 
 addgas = False
@@ -453,7 +480,7 @@ if addgas:
     # to gas list
     append_from_dico(adico, gaslist=gas_list, gasvisu=gas_visu)
 
-#%% csv file  NB paths_b.record = ~/enva/clinique/recordings
+# %% csv file  NB paths_b.record = ~/enva/clinique/recordings
 addgas = False
 if addgas:
     file = "casClin/recrut/gas.csv"
@@ -467,7 +494,7 @@ if addgas:
     for i in range(len(in_df)):
         append_from_dico(in_df.iloc[i].to_dict(), gaslist=gas_list, gasvisu=gas_visu)
 
-#%% h5 file
+# %% h5 file
 addgas = False
 if addgas:
     airline = "~/enva/clinique/recordings/data/200816_airline"
@@ -484,7 +511,7 @@ if save:
     in_df.to_excel(file_name)
 
 
-#%% #%% to plot all the graphs
+# %% #%% to plot all the graphs
 # (NB pyplot = True return a pyplot, False return a matplotnib Figure Obj)
 
 plt.close("all")
@@ -492,7 +519,8 @@ plt.close("all")
 
 def plot_figs(gases: list, **kwargs) -> plt.Figure:
     """
-    plot the gases
+    Plot the gases.
+
     Parameters
     ----------
     gases : list of gases objects
@@ -506,11 +534,11 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
         'path' ('~/test') : to save
         'folder' ('fig') : added to the save path
         'name'('None') = id of the animal
+
     Returns
     -------
     figlist : list of plotted figures
     fignames : list of figures suptitles
-
     """
     # print(kwargs)
     params: Dict[str, Any] = {
@@ -619,9 +647,14 @@ def plot_figs(gases: list, **kwargs) -> plt.Figure:
 
 def print_beamer_include(folder: str, figlist: list) -> None:
     """
-    print in console the beamer commands to include the generated plots
-    input : folder (the path inside the beamer folder)
-    fig_list
+    Print in console the beamer commands to include the generated plots.
+
+    Parameters
+    ----------
+    folder : str
+        the path inside the beamer folder
+    fig_list: list
+        the figure list
     """
     print("******** beamer commands *******")
     for fig in figlist:
@@ -663,7 +696,7 @@ if plot:
     fig_list, fig_names = plot_figs(gas_list, **varDico)
     print_beamer_include(varDico["folder"], fig_names)
 
-#%% to plot the standart ventil figures
+# %% to plot the standart ventil figures
 if plot:
     picts = [
         "alveoloCap.png",
@@ -676,7 +709,7 @@ if plot:
     figure = bgplot.showPicture(picts[:2], paths_b.pict_)  # alvCap + physio
     figure = bgplot.showPicture(picts[2:], paths_b.pict_)  # dsShuntemail
 
-#%% to plot from csv: (see libreOffice template)
+# %% to plot from csv: (see libreOffice template)
 csv = False
 if csv:
     day = os.path.basename(file_name)[:6]
@@ -686,17 +719,20 @@ if csv:
     in_df.delay = in_df.delay.apply(lambda x: x.seconds // 60).replace(np.nan, 0)
     # df.set_index('delay', inplace=True)
 
-#%% display the evolution of the blood gases iono, ....
+# %% display the evolution of the blood gases iono, ....
 
 plt.close("all")
 
 
 def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     """
+    Plot 02 and CO2 evolution.
+
     Parameters
     ----------
     df : pandas dataframe
         (index can be set to date_time)
+
     Returns
     -------
     fig : pyplot figure.
@@ -755,10 +791,13 @@ def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
 
 def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     """
+    Plot acido_basic informations.
+
     Parameters
     ----------
     df : pandas dataframe
-    (index can be set to datetime)
+        (index can be set to datetime)
+
     Returns
     -------
     None.
@@ -822,7 +861,8 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
 
 def plot_metabo(df: pd.DataFrame) -> plt.Figure:
     """
-    plot hco3- and anionGap over time
+    Plot hco3- and anionGap over time.
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -830,7 +870,7 @@ def plot_metabo(df: pd.DataFrame) -> plt.Figure:
 
     Returns
     -------
-    None.PLT;fIGURE
+    plt.Figure
     """
     fig = plt.figure(figsize=(8, 4))
     fig.suptitle("métabo", color="tab:gray")
@@ -879,6 +919,8 @@ def plot_metabo(df: pd.DataFrame) -> plt.Figure:
 
 def plot_iono(df: pd.DataFrame) -> plt.Figure:
     """
+    Plot Iono.
+
     Parameters
     ----------
     df : pandas.DataFrame
@@ -963,7 +1005,8 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
 
 def plot_hb(df: pd.DataFrame) -> plt.Figure:
     """
-    plot hb over time
+    Plot hb over time.
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -1001,7 +1044,7 @@ def plot_hb(df: pd.DataFrame) -> plt.Figure:
     return fig
 
 
-#%%
+# %%
 plot_evol = False
 if plot_evol:
     plot_evol_o2co2(in_df)

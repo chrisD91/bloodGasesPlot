@@ -7,7 +7,9 @@ a pyQt module to plot arterial blood gases
 """
 import sys
 import copy
-from bloodGases import bgplot as bg
+
+# from bloodGases import bgplot as bg
+import bgplot as bg
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
