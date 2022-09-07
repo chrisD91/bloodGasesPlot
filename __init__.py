@@ -5,9 +5,6 @@ import sys
 # see https://stackoverflow.com/questions/16981921/relative-imports-in-python-3
 from pathlib import Path
 
-# to be able to use imports in spyder
-# from PyQt5.QtWidgets import QApplication, QFileDialog
-
 
 print("Running" if __name__ == "__main__" else "Importing", Path(__file__).resolve())
 if os.path.dirname(os.path.realpath(__file__)) not in sys.path:
@@ -24,6 +21,3 @@ usual = dict(
     cl=[98, 104],
     k=[2.2, 4],
 )
-
-
-# from bloodGases import bgplot

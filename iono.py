@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-## for Palatino and other serif fonts use:
+# for Palatino and other serif fonts use:
 rc("font", **{"family": "serif", "serif": ["Palatino"]})
 rc("font", size=14)
 rc("text", usetex=True)
@@ -30,19 +30,24 @@ usual = dict(
 # protein
 
 
-#%%
+# %%
 
 plt.close("all")
 
 
-def plot_aniongap(**kwargs):
+def plot_aniongap(**kwargs: float) -> plt.Figure:
     """
-    plot the normal anionGap values
-    input  na (140) k (3.5), cl = 105, hco3 = 24,
+    Plot the normal anionGap values.
+
+    Parameters
+    ----------
+    **kwargs : dictionary
+        na (140) k (3.5), cl = 105, hco3 = 24.
 
     Returns
     -------
-    fig : matplotlib figure
+    fig : plt.Figure
+        the matplotlib figure
 
     """
     iono_std = dict(na=140, k=3.5, cl=105, hco3=24, albu=40, phosphore=1)
@@ -52,12 +57,12 @@ def plot_aniongap(**kwargs):
     categories = ["cations", "anions"]
 
     # [na, indosés(mg, ca, k)]
-    cations = [140, 5, 25]
+    cations: list[float] = [140, 5, 25]
     cations = [vals["na"], vals["k"], 25]
     print(cations)
 
     # [cl, hco3, albumine, phosphate, indosés (Xa, lactates)]
-    anions = [105, 25]
+    anions: list[float] = [105, 25]
     anions = [vals["cl"], vals["hco3"]]
     print(anions)
 

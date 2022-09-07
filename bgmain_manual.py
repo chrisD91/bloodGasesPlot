@@ -15,7 +15,6 @@ from typing import Tuple, Any, List, Dict, Callable
 from socket import gethostname
 from time import localtime, strftime
 import datetime
-from math import floor, ceil
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
@@ -24,35 +23,19 @@ import numpy as np
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
-
-# from bloodGases import bgplot as bg
-
-# from . import bgplot
 import bgplot
-
-
-# ------------------------------------------
-# class Bunch(dict):
-#     """Bunch classical Bunch class"""
-
-#     # def __init__(self, **kwds):
-#     #     super().__init__(**kwds)
-#     #     self.__dict__ = self
-
-#     def __init__(self, **kwargs):
-#         self.__dict__.update(kwargs)
 
 
 class Bunch(dict):
     """Create a Bunch class."""
 
-    def __getattribute__(self, key):
+    def __getattribute__(self, key: str) -> None:
         try:
             return self[key]
         except KeyError:
             raise AttributeError(key)
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: str) -> None:
         self[key] = value
 
 
@@ -103,7 +86,7 @@ def build_path() -> Any:
     return paths_bunch
 
 
-def append_anesth_plot_path(paths_bunch) -> None:
+def append_anesth_plot_path(paths_bunch: Any) -> None:
     """AnesthPlot module."""
     base = ["pg", "chrisPg", "enva", "spyder", "record"]
     base.insert(0, paths_bunch.root_)
@@ -115,7 +98,7 @@ def append_anesth_plot_path(paths_bunch) -> None:
     os.chdir(mod_path)
 
 
-def append_blood_gases_path(paths_bunch) -> None:
+def append_blood_gases_path(paths_bunch: Any) -> None:
     """Bloodgases."""
     base = ["pg", "chrisPg", "enva", "spyder", "bg"]
     base.insert(0, paths_bunch.root_)
@@ -130,7 +113,7 @@ paths_b = build_path()
 # append_blood_gases_path(paths_b)
 
 
-def build_xcel_model(dirname: str = None):
+def build_xcel_model(dirname: str = None) -> None:
     """
     Save a generic xlsx file to enter the blood gases data.
 
@@ -228,7 +211,9 @@ def add_o2co2_toBg(bgdf: pd.DataFrame, monitortrend: pd.DataFrame) -> pd.DataFra
 
 
 def append_from_dico(
-    dico: dict, gaslist: Optional[list] = None, gasvisu: Optional[dict] = None
+    dico: Optional[dict],
+    gaslist: Optional[list] = None,
+    gasvisu: Optional[dict[str, Any]] = None,
 ) -> Tuple[list, dict]:
     """
     Manual entries for blood gases values.
@@ -419,8 +404,10 @@ def csv_to_df(filename: str) -> pd.DataFrame:
 
 
 def df_append_to_gases(
-    df: pd.DataFrame, gaslist: Optional[list] = None, gasvisu: Optional[dict] = None
-) -> Tuple[list, dict]:
+    df: pd.DataFrame,
+    gaslist: Optional[list] = None,
+    gasvisu: Optional[dict[str, Any]] = None,
+) -> Tuple[list[Any], dict[str, Any]]:
     """
     Append to gases.
 
@@ -446,12 +433,12 @@ def df_append_to_gases(
         gaslist, gasvisu = append_from_dico(None)
     # fill line by line
     for i in range(len(df)):
-        gaslist, gasvisu = append_from_dico(
+        newgaslist, newgasvisu = append_from_dico(
             df.iloc[i].to_dict(), gaslist=gaslist, gasvisu=gasvisu
         )
     print("_" * 15)
     print(f"added {i} gases to the gas list")
-    return gaslist, gasvisu
+    return newgaslist, newgasvisu
 
 
 # build the reference set (ie room air, normal lung, normal respiratory state)
@@ -517,7 +504,7 @@ if save:
 plt.close("all")
 
 
-def plot_figs(gases: list, **kwargs) -> plt.Figure:
+def plot_figs(gases: list[Any], **kwargs: float) -> plt.Figure:
     """
     Plot the gases.
 
@@ -671,7 +658,7 @@ def print_beamer_include(folder: str, figlist: list) -> None:
 # (NB pyplot = True return a pyplot, False return a matplotnib Figure Obj)
 # plt.close('all')
 # num     = 1             # gas number (0 = ref, first=1)
-##num = len(gases) - 1
+# #num = len(gases) - 1
 # reverse=False
 # save    = False
 # ident   = ''
@@ -938,7 +925,7 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     # lims = ax.get_xlim()
     # ax.hlines(135, *lims, colors='r', alpha=0.5, linestyles='dashed')
     # ax.hlines(145, *lims, colors='r', alpha=0.5, linestyles='dashed')
-    usual = [136, 142]
+    usual: list[float] = [136, 142]
     spread = set(usual) | set(ax.get_ylim())
     lims = bgplot.round_lims(spread, 5)
     ax.set_ylim(lims)
