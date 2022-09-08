@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue Feb 16 15:26:14 2016.
 
 @author: cdesbois
 """
+
 import os
 import logging
 from typing import Any, Set, Optional, Callable
@@ -414,6 +416,8 @@ def plot_acidbas(
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
         plt.show()
+    fig.text(0.99, 0.01, "plot_acidbas", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -499,6 +503,8 @@ def plot_display(
             name = os.path.join(savedir, (str(ident) + "display"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_display", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -527,7 +533,7 @@ def phline(val: float) -> list[str]:
     if val < ref[0]:
         arrows[0] = "<<"
     # middle
-    if ref[1] < val < ref[2]:
+    if ref[1] <= val <= ref[2]:
         arrows[1] = "x"
     # hight
     if ref[2] < val:
@@ -558,7 +564,7 @@ def co2line(val: float) -> list[str]:
         arrows[0] = "x"
     if val > ref[0]:
         arrows[0] = "<<"
-    if ref[1] > val > ref[2]:
+    if ref[1] >= val >= ref[2]:
         arrows[1] = "x"
     if ref[2] > val:
         arrows[2] = "x"
@@ -588,7 +594,7 @@ def hco3line(val: float) -> list[str]:
         arrows[0] = "x"
     if val < ref[0]:
         arrows[0] = "<<"
-    if ref[1] < val < ref[2]:
+    if ref[1] <= val <= ref[2]:
         arrows[1] = "x"
     if ref[2] < val:
         arrows[2] = "x"
@@ -669,7 +675,9 @@ def plot_morpion(
             name = os.path.join(savedir, (str(ident) + "morpion"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
-    # else:
+
+    fig.text(0.99, 0.01, "plot_morpion", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -756,6 +764,9 @@ def plot_o2(
             name = os.path.join(savedir, (str(ident) + "O2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+
+    fig.text(0.99, 0.01, "plot_o2", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -876,6 +887,8 @@ def plot_ventil(
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
         plt.show()
+    fig.text(0.99, 0.01, "plot_ventil", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -982,6 +995,8 @@ def plot_pieCasc(
                 name = os.path.join(savedir, (str(ident) + "pieCasc"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_pieCasc", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1093,8 +1108,10 @@ def plot_cascO2(
             name = os.path.join(savedir, (str(ident) + "cascO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+
     fig.text(0.99, 0.01, "plot_cascO2", ha="right", va="bottom", alpha=0.4, size=12)
     fig.text(0.01, 0.01, f"{nums=}", ha="left", va="bottom", alpha=0.4, size=12)
+
     return fig
 
 
@@ -1264,6 +1281,8 @@ def plot_GAa(
             name = os.path.join(savedir, (str(ident) + "Gaa"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_GAa", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1374,6 +1393,8 @@ def plot_ratio(
             name = os.path.join(savedir, (str(ident) + "ratio"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_ratio", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1507,6 +1528,8 @@ def plot_GAaRatio(
             name = os.path.join(savedir, (str(ident) + "GAaRatio"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_GAaRatio", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1582,6 +1605,10 @@ def plot_RatioVsFio2(
             name = os.path.join(savedir, (str(ident) + "ratioVsFio2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(
+        0.99, 0.01, "plot_RatioVsFio2", ha="right", va="bottom", alpha=0.4, size=12
+    )
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1673,6 +1700,8 @@ def plot_satHb(
             name = os.path.join(savedir, (str(ident) + "satHb"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_satHb", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1757,6 +1786,8 @@ def plot_CaO2(
             name = os.path.join(savedir, (str(ident) + "caO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_CaO2", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1856,6 +1887,8 @@ def plot_varCaO2(
             name = os.path.join(savedir, (str(ident) + "varCaO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_varCaO2", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1933,6 +1966,8 @@ def plot_hbEffect(
             name = os.path.join(savedir, (str(ident) + "hBEffect"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_hbEffect", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1992,6 +2027,10 @@ def plot_satHorseDog(
             name = os.path.join(savedir, (str(ident) + "satHorseDog"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(
+        0.99, 0.01, "plot_satHorseDog", ha="right", va="bottom", alpha=0.4, size=12
+    )
+    fig.text(0.01, 0.01, f"{num=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
