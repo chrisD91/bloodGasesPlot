@@ -862,9 +862,11 @@ class ApplicationWindow(QMainWindow):
 #
 # ==============================================================================
 
+# check https://stackoverflow.com/questions/58671506/qapplication-and-main-window-connection
+
 if __name__ == "__main__":
     app = QApplication.instance()  # checks if QApplication already exists
-    if not app:  # create QApplication if it doesnt exist
+    if app is None:  # create QApplication if it doesnt exist
         app = QApplication(sys.argv)
     # ex = SelectGas(gases, gasesV)
     # ex = Gas()

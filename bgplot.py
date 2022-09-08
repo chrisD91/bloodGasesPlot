@@ -875,10 +875,15 @@ def plot_pieCasc(
     labels = ["$N_2$", "$O_2$", "$H_2O$", "$CO_2$"]
     colors = ["tab:gray", "tab:green", "tab:cyan", "tab:orange"]
     valKey = ["N2", "O2", "H2O", "CO2"]
-    if num > 0:
+    try:
         gas = gases[num]
-    else:
+    except IndexError:
+        logging.warning(f"{num=} not in gases lenght")
         gas = gases[0]
+    # if num > 0:
+    #   gas = gases[num]
+    # else:
+    #    gas = gases[0]
     val = gas.piecasc()
     for d in val:
         if any(np.isnan(x) for x in d.values()):
@@ -1106,10 +1111,11 @@ def plot_cascO2Lin(
     st2 = r" avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $"
     ax.text(0, 50, st1 + st2, fontsize=14, alpha=0.6)
     try:
-        for lst in values:
+        for lst in values.values():
             for i, item in enumerate(lst):
                 ax.annotate(str(int(lst[i])), xy=(i + 0.1, item), alpha=0.6)
     except ValueError:
+        breakpoint()
         print("plot_cascO2Lin some values are missing")
         logging.warning("plot_cascO2Lin some values are missing")
     # fig.set.tight_layout(True)

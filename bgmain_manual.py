@@ -211,9 +211,7 @@ def add_o2co2_toBg(bgdf: pd.DataFrame, monitortrend: pd.DataFrame) -> pd.DataFra
 
 
 def append_from_dico(
-    dico: Optional[dict],
-    gaslist: Optional[list] = None,
-    gasvisu: Optional[dict[str, Any]] = None,
+    dico: Optional[dict], gaslist: Optional[list] = None, gasvisu: Optional[dict] = None
 ) -> Tuple[list, dict]:
     """
     Manual entries for blood gases values.
@@ -404,10 +402,8 @@ def csv_to_df(filename: str) -> pd.DataFrame:
 
 
 def df_append_to_gases(
-    df: pd.DataFrame,
-    gaslist: Optional[list] = None,
-    gasvisu: Optional[dict[str, Any]] = None,
-) -> Tuple[list[Any], dict[str, Any]]:
+    df: pd.DataFrame, gaslist: Optional[list] = None, gasvisu: Optional[dict] = None
+) -> Tuple[list, dict]:
     """
     Append to gases.
 
@@ -504,7 +500,7 @@ if save:
 plt.close("all")
 
 
-def plot_figs(gases: list[Any], **kwargs: float) -> plt.Figure:
+def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
     """
     Plot the gases.
 
