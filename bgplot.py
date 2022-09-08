@@ -6,7 +6,7 @@ Created on Tue Feb 16 15:26:14 2016.
 """
 import os
 import logging
-from typing import Any, Set
+from typing import Any, Set, Optional, Callable
 from math import floor, ceil
 
 import matplotlib.pyplot as plt
@@ -281,10 +281,10 @@ def caO2(species: str, hb: float, po2: float) -> float:
 def plot_acidbas(
     gases: list,
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot the acid-base analysis.
@@ -309,6 +309,8 @@ def plot_acidbas(
     fig : plt.Figure or matplotlib.Figure
         the plot
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -409,7 +411,7 @@ def plot_acidbas(
             ax.spines[spine].set_visible(False)
     if pyplot:
         if save:
-            name = os.path.join(path, (str(ident) + "acidBase"))
+            name = os.path.join(savedir, (str(ident) + "acidBase"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
         plt.show()
@@ -420,10 +422,10 @@ def plot_acidbas(
 def plot_display(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot a display of the gas values.
@@ -434,7 +436,7 @@ def plot_display(
         list of bg.Gas objects
     num : int
         location in the list.
-    path : str
+    savedir : str
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
@@ -448,6 +450,8 @@ def plot_display(
     fig : plt.Figure or matplotlib.Figure
         the plot
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     # title = "mesured values"
     rows = ["num", "spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
     usualVal: dict[str, Any] = {}
@@ -495,7 +499,7 @@ def plot_display(
         # fig.set.tight_layout(True)
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "display"))
+            name = os.path.join(savedir, (str(ident) + "display"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -599,10 +603,10 @@ def hco3line(val: float) -> list[str]:
 def plot_morpion(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot a 'morpion like' display.
@@ -627,6 +631,8 @@ def plot_morpion(
     fig : plt.Figure or matplotlib.Figure
         the plot
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     gas = gases[num - 1]
     title = (
         "pH=" + str(gas.ph) + r"    pco2=" + str(gas.pco2) + "    hco3=" + str(gas.hco3)
@@ -663,7 +669,7 @@ def plot_morpion(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "morpion"))
+            name = os.path.join(savedir, (str(ident) + "morpion"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     # else:
@@ -674,10 +680,10 @@ def plot_morpion(
 def plot_o2(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot O2.
@@ -702,6 +708,8 @@ def plot_o2(
     fig : plt.Figure or matplotlib.Figure
         the plot
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -751,7 +759,7 @@ def plot_o2(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "O2"))
+            name = os.path.join(savedir, (str(ident) + "O2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -761,10 +769,10 @@ def plot_o2(
 def plot_ventil(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot ventil.
@@ -788,6 +796,8 @@ def plot_ventil(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -871,7 +881,7 @@ def plot_ventil(
     # #fig.set.tight_layout(True)
     if pyplot:
         if save:
-            name = os.path.join(path, (str(ident) + "ventil"))
+            name = os.path.join(savedir, (str(ident) + "ventil"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
         plt.show()
@@ -882,11 +892,11 @@ def plot_ventil(
 def plot_pieCasc(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
     pcent: bool = True,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     # fio2=0.21, paco2=40
     """
@@ -911,6 +921,8 @@ def plot_pieCasc(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     titles = ["inspiré", "aérien", "alvéolaire"]
     explodes = [[0.1, 0], [0, 0, 0.3], [0, 0, 0, 0.3]]
 
@@ -978,9 +990,9 @@ def plot_pieCasc(
         fig.tight_layout()
         if save:
             if pcent:
-                name = os.path.join(path, (str(ident) + "pieCascPercent"))
+                name = os.path.join(savedir, (str(ident) + "pieCascPercent"))
             else:
-                name = os.path.join(path, (str(ident) + "pieCasc"))
+                name = os.path.join(savedir, (str(ident) + "pieCasc"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -990,10 +1002,10 @@ def plot_pieCasc(
 def plot_cascO2(
     gases: list[Any],
     nums: list,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot the O2 cascade.
@@ -1018,6 +1030,8 @@ def plot_cascO2(
     fig : plt.Figure or matplotlib.Figure
         histogram
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     # ref
     if 0 not in nums:
         nums.insert(0, 0)
@@ -1081,7 +1095,7 @@ def plot_cascO2(
         # #fig.set.tight_layout(True)
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "cascO2"))
+            name = os.path.join(savedir, (str(ident) + "cascO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1090,10 +1104,10 @@ def plot_cascO2(
 def plot_cascO2Lin(
     gases: list[Any],
     nums: list,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot the O2 cascade.
@@ -1117,6 +1131,8 @@ def plot_cascO2Lin(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     # ref
     if 0 not in nums:
         nums.insert(0, 0)
@@ -1165,7 +1181,7 @@ def plot_cascO2Lin(
         fig.tight_layout()
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "cascO2"))
+            name = os.path.join(savedir, (str(ident) + "cascO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1175,10 +1191,10 @@ def plot_cascO2Lin(
 def plot_GAa(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot alveolo-arterial gradient.
@@ -1203,6 +1219,8 @@ def plot_GAa(
     fig : plt.Figure or matplotlib.Figure
 
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if len(gases) > 1:
         casc = gases[num].casc()
     else:
@@ -1241,7 +1259,7 @@ def plot_GAa(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "Gaa"))
+            name = os.path.join(savedir, (str(ident) + "Gaa"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1251,10 +1269,10 @@ def plot_GAa(
 def plot_ratio(
     gases: list[Any],
     num: int,
-    savepath: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot the ratio O2insp / PaO2.
@@ -1279,6 +1297,8 @@ def plot_ratio(
     fig : plt.Figure or matplotlib.Figure
 
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -1352,7 +1372,7 @@ def plot_ratio(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(savepath, (str(ident) + "ratio"))
+            name = os.path.join(savedir, (str(ident) + "ratio"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1362,10 +1382,10 @@ def plot_ratio(
 def plot_GAaRatio(
     gases: list[Any],
     num: int,
-    savepath: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot alveolo-arterial gradient.
@@ -1389,6 +1409,8 @@ def plot_GAaRatio(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -1486,7 +1508,7 @@ def plot_GAaRatio(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(savepath, (str(ident) + "GAaRatio"))
+            name = os.path.join(savedir, (str(ident) + "GAaRatio"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1495,10 +1517,10 @@ def plot_GAaRatio(
 # ------------------------------------
 def plot_RatioVsFio2(
     mes: dict[Any, Any],
-    savepath: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot ratio vs FIO2.
@@ -1522,6 +1544,8 @@ def plot_RatioVsFio2(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     paO2 = mes["po2"]
     fiO2 = mes["fio2"]
 
@@ -1559,7 +1583,7 @@ def plot_RatioVsFio2(
         # ##fig.set.tight_layout(True)
         plt.show()
         if save:
-            name = os.path.join(savepath, (str(ident) + "ratioVsFio2"))
+            name = os.path.join(savedir, (str(ident) + "ratioVsFio2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1569,10 +1593,10 @@ def plot_RatioVsFio2(
 def plot_satHb(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot ratio vs FIO2.
@@ -1596,6 +1620,8 @@ def plot_satHb(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -1648,7 +1674,7 @@ def plot_satHb(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "satHb"))
+            name = os.path.join(savedir, (str(ident) + "satHb"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1658,10 +1684,10 @@ def plot_satHb(
 def plot_CaO2(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot CaO2.
@@ -1685,6 +1711,8 @@ def plot_CaO2(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -1733,7 +1761,7 @@ def plot_CaO2(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "caO2"))
+            name = os.path.join(savedir, (str(ident) + "caO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1743,10 +1771,10 @@ def plot_CaO2(
 def plot_varCaO2(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot CaO2 and CaO2 variation (slope).
@@ -1770,6 +1798,8 @@ def plot_varCaO2(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -1833,7 +1863,7 @@ def plot_varCaO2(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "varCaO2"))
+            name = os.path.join(savedir, (str(ident) + "varCaO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1843,10 +1873,10 @@ def plot_varCaO2(
 def plot_hbEffect(
     gases: list[Any],
     num: int,
-    path: str,
+    savedir: Optional[str] = None,
     ident: str = "",
     save: bool = False,
-    pyplot: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot CaO2 for several Hb contents.
@@ -1870,6 +1900,8 @@ def plot_hbEffect(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if num > 1:
         gas = gases[num]
     else:
@@ -1911,7 +1943,7 @@ def plot_hbEffect(
     if pyplot:
         plt.show()
         if save:
-            name = os.path.join(path, (str(ident) + "hBEffect"))
+            name = os.path.join(savedir, (str(ident) + "hBEffect"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
@@ -1919,14 +1951,17 @@ def plot_hbEffect(
 
 # --------------------------------------
 def plot_satHorseDog(
-    savepath: str, ident: str = "", save: bool = False, pyplot: bool = False
+    savedir: Optional[str] = None,
+    ident: str = "",
+    save: bool = False,
+    pyplot: bool = True,
 ) -> plt.Figure:
     """
     Plot satHb horse and dog.
 
     Parameters
     ----------
-    savepath : str
+    savedir : str
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
@@ -1939,6 +1974,8 @@ def plot_satHorseDog(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
+    if savedir is None:
+        savedir = os.path.expanduser("~")
     if pyplot:
         fig = plt.figure(figsize=(10, 8))
     else:
@@ -1965,16 +2002,16 @@ def plot_satHorseDog(
         # #fig.set.tight_layout(True)
         plt.show()
         if save:
-            name = os.path.join(savepath, (str(ident) + "satHorseDog"))
+            name = os.path.join(savedir, (str(ident) + "satHorseDog"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
     return fig
 
 
 # -----------------------------------------------------------------------------
-
-
-def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt.Figure:
+def showPicture(
+    files: list[str], dirname: Optional[str] = None, title: str = ""
+) -> plt.Figure:
     """
     To include a picture.
 
@@ -1982,7 +2019,7 @@ def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt
     ----------
     files : list[str]
         a list of file names.
-    folderPath : str, optional (default is "~")
+    folderpath : str, optional (default is "~")
         the directory path
     title : str, optional (default is "")
         title to add to the display
@@ -1992,17 +2029,19 @@ def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt
     plt.Figure
 
     """
-    folderPath = os.path.expanduser(folderPath)
-    file = os.path.join(folderPath, files[0])
+    if dirname is None:
+        dirname = "~"
+    dirname = os.path.expanduser(dirname)
+    file = os.path.join(dirname, files[0])
     if not os.path.isfile(file):
         print("file doesn't exist", file)
         return plt.Figure()
     fig = plt.figure(figsize=(12, 6))
     fig.suptitle(title)
     if len(files) == 1:
-        file = os.path.join(folderPath, files[0])
+        file = os.path.join(dirname, files[0])
         ax = fig.add_subplot(111)
-        #        im = plt.imread(file)
+        # im = plt.imread(file)
         im = mpimg.imread(file)
         ax.imshow(im)
         ax.axis("off")
@@ -2013,7 +2052,7 @@ def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt
     elif len(files) == 2:
         for i, item in enumerate(files):
             ax = fig.add_subplot(1, 2, i + 1)
-            file = os.path.join(folderPath, item)
+            file = os.path.join(dirname, item)
             im = plt.imread(file)
             ax.imshow(im)
             ax.axis("off")
@@ -2028,14 +2067,14 @@ def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt
 
 # -----------------------------------------------------------------------------
 def saveGraph(
-    path: str, ext: str = "png", close: bool = True, verbose: bool = True
+    filename: str, ext: str = "png", close: bool = True, verbose: bool = True
 ) -> None:
     """
     Save a figure from pyplot.
 
     Parameters
     ----------
-    path : string
+    filename : string
         The path (and filename, without the extension) to save the
         figure to.
     ext : string (default='png')
@@ -2052,19 +2091,19 @@ def saveGraph(
         has been saved.
     """
     # Extract the directory and filename from the given path
-    directory = os.path.split(path)[0]
-    filename = os.path.split(path)[1] + "." + ext.strip(".")
-    if directory == "":
-        directory = "."
+    dirname = os.path.dirname(filename)
+    file = os.path.split(filename)[1] + "." + ext.strip(".")
+    if dirname == "":
+        dirname = "."
     # If the directory does not exist, create it
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
     # The final path to save to
-    savepath = os.path.join(directory, filename)
+    savedir = os.path.join(dirname, file)
     if verbose:
-        print(f"Saving figure to {savepath} ...")
+        print(f"Saving figure to {savedir} ...")
     # Actually save the figure
-    plt.savefig(savepath)
+    plt.savefig(savedir)
     # Close it
     if close:
         plt.close()
@@ -2078,3 +2117,24 @@ if __name__ == "__main__":
 
     data_df = trainingData.load_data()
     gases, gasesV = trainingData.build_gases(data_df)
+    num = np.random.randint(len(gases))
+    funcs: list[Callable] = [
+        plot_display,
+        plot_morpion,
+        plot_acidbas,
+        plot_o2,
+        plot_ventil,
+        plot_satHb,
+        plot_cascO2,
+        plot_hbEffect,
+        plot_varCaO2,
+        plot_pieCasc,
+        plot_cascO2,
+        plot_cascO2Lin,
+        plot_GAa,
+        plot_GAaRatio,
+        plot_ratio,
+    ]
+    # %%
+    for func in funcs:
+        func(gases, num)
