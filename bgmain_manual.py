@@ -12,6 +12,7 @@ For manual use of the plotting.
 import os
 import sys
 import faulthandler
+import logging
 from typing import Optional
 from typing import Tuple, Any, List, Dict, Callable
 
@@ -28,6 +29,16 @@ import pandas as pd
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
 import bgplot
+
+logfile = os.path.expanduser(os.path.join("~", "blood_gases.log"))
+logging.basicConfig(
+    level=logging.INFO,
+    force=True,
+    format="%(levelname)s:%(funcName)s:%(message)s",
+    filename=logfile,
+    filemode="w+",
+    # handlers=[logging.FileHandler(logfile)],
+)
 
 
 class Bunch(dict):

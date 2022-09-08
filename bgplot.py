@@ -17,7 +17,7 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import pandas as pd
 
-logfile = os.path.expanduser(os.path.join("~", "blodd_gases.log"))
+logfile = os.path.expanduser(os.path.join("~", "blood_gases.log"))
 logging.basicConfig(
     level=logging.INFO,
     force=True,
@@ -285,7 +285,7 @@ def plot_acidbas(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -297,11 +297,11 @@ def plot_acidbas(
         list of bg.Gas objects
     num : int
         location in the list.
-    path : str
+    savedir : str
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -313,10 +313,7 @@ def plot_acidbas(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     species = gas.spec
     if species == "horse":
         phRange = [7.35, 7.45]
@@ -412,7 +409,7 @@ def plot_acidbas(
         for spine in ["left", "top", "right", "bottom"]:
             ax.spines[spine].set_visible(False)
     if pyplot:
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "acidBase"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -426,7 +423,7 @@ def plot_display(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -442,7 +439,7 @@ def plot_display(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -457,12 +454,8 @@ def plot_display(
     # title = "mesured values"
     rows = ["num", "spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
     usualVal: dict[str, Any] = {}
-    if len(gases) == 1:
-        used_num = 0  # only reference
-    else:
-        used_num = num  # reference + measured
-        usualVal["num"] = used_num
-    usualVal["spec"] = getattr(gases[used_num], "spec")
+    usualVal["num"] = num
+    usualVal["spec"] = gases[num].spec
     usualVal["hb"] = 12
     usualVal["fio2"] = "0.21 - 1"
     usualVal["po2"] = "3-5 * fio2"
@@ -471,12 +464,14 @@ def plot_display(
     usualVal["hco3"] = "24 (20-30)"
     usualVal["etco2"] = "38 (35-45)"
 
-    data = []
-    data.append([used_num, used_num])
-    for row in rows[1:]:
-        data.append([getattr(gases[used_num], row), usualVal[row]])
     cols = ["mesure", "usual"]
+    data = []
+    # NB 'num' is not a gas attibute
+    data.append([num, num])
+    for row in rows[1:]:
+        data.append([getattr(gases[num], row), usualVal[row]])
 
+    fig = plt.figure(figsize=(14, 5)) if pyplot else Figure(figsize=(14, 5))
     if pyplot:
         fig = plt.figure(figsize=(14, 5))
     else:
@@ -500,7 +495,7 @@ def plot_display(
     if pyplot:
         # fig.set.tight_layout(True)
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "display"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -527,17 +522,17 @@ def phline(val: float) -> list[str]:
     # base
     arrows = ["-", "-", "-"]
     # low´´
+    if val < ref[1]:
+        arrows[0] = "x"
     if val < ref[0]:
         arrows[0] = "<<"
-    elif ref[0] < val < ref[1]:
-        arrows[0] = "x"
     # middle
-    elif ref[1] < val < ref[2]:
+    if ref[1] < val < ref[2]:
         arrows[1] = "x"
     # hight
-    elif ref[1] < val < ref[2]:
+    if ref[2] < val:
         arrows[2] = "x"
-    elif ref[3] < val < ref[2]:
+    if ref[3] < val:
         arrows[2] = ">>"
     return arrows
 
@@ -559,15 +554,15 @@ def co2line(val: float) -> list[str]:
     """
     ref = [60, 42, 38, 30]  # NB data are presented in acid , norm, basic order
     arrows = ["-", "–", "-"]
+    if val > ref[1]:
+        arrows[0] = "x"
     if val > ref[0]:
         arrows[0] = "<<"
-    elif ref[0] > val > ref[1]:
-        arrows[0] = "x"
-    elif ref[1] > val > ref[2]:
+    if ref[1] > val > ref[2]:
         arrows[1] = "x"
-    elif ref[2] > val > ref[3]:
+    if ref[2] > val:
         arrows[2] = "x"
-    elif ref[3] > val:
+    if ref[3] > val:
         arrows[2] = ">>"
     return arrows
 
@@ -589,15 +584,15 @@ def hco3line(val: float) -> list[str]:
     """
     ref = [14, 22, 26, 32]
     arrows = ["-", "–", "-"]
+    if val < ref[1]:
+        arrows[0] = "x"
     if val < ref[0]:
         arrows[0] = "<<"
-    elif ref[0] < val < ref[1]:
-        arrows[0] = "x"
-    elif ref[1] < val < ref[2]:
+    if ref[1] < val < ref[2]:
         arrows[1] = "x"
-    elif ref[2] < val < ref[3]:
-        arrows[1] = "x"
-    elif ref[3] < val:
+    if ref[2] < val:
+        arrows[2] = "x"
+    if ref[3] < val:
         arrows[2] = ">>"
     return arrows
 
@@ -607,7 +602,7 @@ def plot_morpion(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -623,7 +618,7 @@ def plot_morpion(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -635,7 +630,7 @@ def plot_morpion(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    gas = gases[num - 1]
+    gas = gases[num]
     title = (
         "pH=" + str(gas.ph) + r"    pco2=" + str(gas.pco2) + "    hco3=" + str(gas.hco3)
     )
@@ -670,7 +665,7 @@ def plot_morpion(
     # fig.set_tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "morpion"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -684,7 +679,7 @@ def plot_o2(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -700,7 +695,7 @@ def plot_o2(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -712,16 +707,13 @@ def plot_o2(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     po2 = gas.po2
-
-    if pyplot:
-        fig = plt.figure(figsize=(14, 3))
-    else:
-        fig = Figure(figsize=(14, 3))
+    fig = plt.figure(figsize=(14, 3)) if pyplot else Figure(figsize=(14, 3))
+    # if pyplot:
+    #     fig = plt.figure(figsize=(14, 3))
+    # else:
+    #     fig = Figure(figsize=(14, 3))
     # fig.suptitle("oxygénation : $Pa_{O_2}$ ", fontsize=24, backgroundcolor='w',
     #              color='tab:gray')
     ax = fig.add_subplot(111)
@@ -760,7 +752,7 @@ def plot_o2(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "O2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -773,7 +765,7 @@ def plot_ventil(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -789,7 +781,7 @@ def plot_ventil(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -800,10 +792,7 @@ def plot_ventil(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     po2 = gas.po2
     pco2 = gas.pco2
 
@@ -882,7 +871,7 @@ def plot_ventil(
             ax.spines[spine].set_visible(False)
     # #fig.set.tight_layout(True)
     if pyplot:
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "ventil"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -896,7 +885,7 @@ def plot_pieCasc(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pcent: bool = True,
     pyplot: bool = True,
 ) -> plt.Figure:
@@ -914,7 +903,7 @@ def plot_pieCasc(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -936,10 +925,6 @@ def plot_pieCasc(
     except IndexError:
         logging.warning(f"{num=} not in gases lenght")
         gas = gases[0]
-    # if num > 0:
-    #   gas = gases[num]
-    # else:
-    #    gas = gases[0]
     val = gas.piecasc()
     for d in val:
         if any(np.isnan(x) for x in d.values()):
@@ -990,7 +975,7 @@ def plot_pieCasc(
     # alpha
     if pyplot:
         fig.tight_layout()
-        if save:
+        if saveit:
             if pcent:
                 name = os.path.join(savedir, (str(ident) + "pieCascPercent"))
             else:
@@ -1006,7 +991,7 @@ def plot_cascO2(
     nums: list,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1022,7 +1007,7 @@ def plot_cascO2(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1039,7 +1024,7 @@ def plot_cascO2(
         nums = [
             nums,
         ]
-    if 0 not in nums:
+    if nums[0] != 0:
         nums.insert(0, 0)
     cascades = {}
     for num in nums:
@@ -1075,7 +1060,7 @@ def plot_cascO2(
             edgecolor="w",
             linewidth=1,
         )
-    ax.set_title("cascade de l' oxygène", color="tab:gray")
+    ax.set_title(r"cascade de l' oxygène", color="tab:gray")
     ax.set_ylabel("pression partielle (mmHg)", color="tab:gray")
     ax.axhline(y=95, xmin=0.75, linewidth=2, alpha=1, color="red")
     ax.axhline(y=40, xmin=0.75, linewidth=2, alpha=1, color="blue")
@@ -1104,10 +1089,12 @@ def plot_cascO2(
     if pyplot:
         # #fig.set.tight_layout(True)
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "cascO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_cascO2", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{nums=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1116,7 +1103,7 @@ def plot_cascO2Lin(
     nums: list,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1132,7 +1119,7 @@ def plot_cascO2Lin(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1147,7 +1134,7 @@ def plot_cascO2Lin(
         nums = [
             nums,
         ]
-    if 0 not in nums:
+    if nums[0] != 0:
         nums.insert(0, 0)
     cascades = {}
     for num in nums:
@@ -1168,7 +1155,7 @@ def plot_cascO2Lin(
         if k == 0:
             label = "ref"
         ax.plot(val, "o-.", label=label, linewidth=2, ms=10, alpha=0.8)
-    ax.set_title("cascade de l oxygène", alpha=0.5)
+    ax.set_title(r"cascade de l'oxygène", alpha=0.5)
     ax.set_ylabel("pression partielle (mmHg)", alpha=0.5)
     ax.axhline(y=95, xmin=0.9, linewidth=2, alpha=1, color="red")
     ax.axhline(y=40, xmin=0.9, linewidth=2, alpha=1, color="blue")
@@ -1193,10 +1180,12 @@ def plot_cascO2Lin(
     if pyplot:
         fig.tight_layout()
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "cascO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
+    fig.text(0.99, 0.01, "plot_cascO2Lin", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, f"{nums=}", ha="left", va="bottom", alpha=0.4, size=12)
     return fig
 
 
@@ -1206,7 +1195,7 @@ def plot_GAa(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1222,7 +1211,7 @@ def plot_GAa(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1271,7 +1260,7 @@ def plot_GAa(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "Gaa"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1284,7 +1273,7 @@ def plot_ratio(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1300,7 +1289,7 @@ def plot_ratio(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1312,10 +1301,7 @@ def plot_ratio(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     ratio = gas.po2 / gas.fio2
     # mes['po2'] / mes['fio2']
 
@@ -1384,7 +1370,7 @@ def plot_ratio(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "ratio"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1397,7 +1383,7 @@ def plot_GAaRatio(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1413,7 +1399,7 @@ def plot_GAaRatio(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1424,10 +1410,7 @@ def plot_GAaRatio(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     casc = gas.casc()
     gAa = casc[-2] - casc[-1]
     ratio = gas.po2 / gas.fio2
@@ -1520,7 +1503,7 @@ def plot_GAaRatio(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "GAaRatio"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1532,7 +1515,7 @@ def plot_RatioVsFio2(
     mes: dict[Any, Any],
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1548,7 +1531,7 @@ def plot_RatioVsFio2(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1595,7 +1578,7 @@ def plot_RatioVsFio2(
     if pyplot:
         # ##fig.set.tight_layout(True)
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "ratioVsFio2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1608,7 +1591,7 @@ def plot_satHb(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1624,7 +1607,7 @@ def plot_satHb(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1635,10 +1618,7 @@ def plot_satHb(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     species = gas.spec
     paO2 = gas.po2
     if paO2 > 200:
@@ -1689,7 +1669,7 @@ def plot_satHb(
     #    #fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "satHb"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1702,7 +1682,7 @@ def plot_CaO2(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1718,7 +1698,7 @@ def plot_CaO2(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1729,10 +1709,7 @@ def plot_CaO2(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     species = gas.spec
     paO2 = gas.po2
     hb = gas.hb
@@ -1776,7 +1753,7 @@ def plot_CaO2(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "caO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1789,7 +1766,7 @@ def plot_varCaO2(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1805,7 +1782,7 @@ def plot_varCaO2(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1816,10 +1793,7 @@ def plot_varCaO2(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     species = gas.spec
     paO2 = gas.po2
     hb = gas.hb
@@ -1878,7 +1852,7 @@ def plot_varCaO2(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "varCaO2"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1891,7 +1865,7 @@ def plot_hbEffect(
     num: int,
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1907,7 +1881,7 @@ def plot_hbEffect(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -1918,10 +1892,7 @@ def plot_hbEffect(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    if num > 1:
-        gas = gases[num]
-    else:
-        gas = gases[0]
+    gas = gases[num]
     species = gas.spec
     paO2 = gas.po2
     hb = gas.hb
@@ -1958,7 +1929,7 @@ def plot_hbEffect(
     # fig.set.tight_layout(True)
     if pyplot:
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "hBEffect"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)
@@ -1969,7 +1940,7 @@ def plot_hbEffect(
 def plot_satHorseDog(
     savedir: Optional[str] = None,
     ident: str = "",
-    save: bool = False,
+    saveit: bool = False,
     pyplot: bool = True,
 ) -> plt.Figure:
     """
@@ -1981,7 +1952,7 @@ def plot_satHorseDog(
         path to save.
     ident : str, optional (default is "")
         string to identify in the save name.
-    save : bool, optional (default is False)
+    saveit : bool, optional (default is False)
         to save or not to save
     pyplot : bool, optional (default is False)
         True: return a pyplot,    else a Figure obj
@@ -2017,7 +1988,7 @@ def plot_satHorseDog(
     if pyplot:
         # #fig.set.tight_layout(True)
         plt.show()
-        if save:
+        if saveit:
             name = os.path.join(savedir, (str(ident) + "satHorseDog"))
             name = os.path.expanduser(name)
             saveGraph(name, ext="png", close=True, verbose=True)

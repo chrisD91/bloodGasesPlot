@@ -7,7 +7,7 @@ a pyQt module to plot arterial blood gases
 
 @author: cdesbois
 """
-
+import os
 import sys
 import copy
 import logging
@@ -35,6 +35,15 @@ from PyQt5.QtWidgets import (
 
 import bgplot
 
+logfile = os.path.expanduser(os.path.join("~", "blood_gases.log"))
+logging.basicConfig(
+    level=logging.INFO,
+    force=True,
+    format="%(levelname)s:%(funcName)s:%(message)s",
+    filename=logfile,
+    filemode="w+",
+    # handlers=[logging.FileHandler(logfile)],
+)
 
 # initialise the 'gases' list and add a fisrt reference value g0
 # initialise a 'gasesV' visualisation dictionary to see the object in spyder
@@ -707,6 +716,7 @@ class ApplicationWindow(QMainWindow):
             print("the resquested plot should be in ", plotList)
             return
         if pyplot is False:
+            logging.warning(f"{name=} {len(gases)=}, {num=}")
             if name == "display":
                 self.plotObjList.append(
                     bgplot.plot_display(gases, num, path, ident, save, pyplot)
