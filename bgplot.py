@@ -192,6 +192,8 @@ def satFit(species: str) -> dict[str, Any]:
     species_list = ["horse", "dog", "cat", "human"]
     if species not in species_list:
         print(f"species should be in {species_list}")
+        logging.warning(f"{species=}, replaced by 'horse")
+        species = "horse"
     sat_curv: dict[str, list[Any]] = {}
     sat_curv["id"] = species_list
     # sat_curv['horse'] = ([2, 99.427, 2.7, 23.8])
@@ -1014,8 +1016,8 @@ def plot_cascO2(
     ----------
     gases : list
         list of bg.Gas objects
-    num : int
-        location in the list.
+    nums : list[int]
+        location(s) in the list.
     path : str
         path to save.
     ident : str, optional (default is "")
@@ -1032,18 +1034,23 @@ def plot_cascO2(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    # ref
+    # if just an integer was passed to the function
+    if type(nums) != list:
+        nums = [
+            nums,
+        ]
     if 0 not in nums:
         nums.insert(0, 0)
-    values = {}
+    cascades = {}
     for num in nums:
         if num in range(len(gases)):
             gas = gases[num]
-            values[num] = gas.casc()
-    if pyplot:
-        fig = plt.figure(figsize=(14, 6))
-    else:
-        fig = Figure(figsize=(16, 8))
+            cascades[num] = gas.casc()
+    fig = plt.figure(figsize=(14, 6)) if pyplot else Figure(figsize=(16, 8))
+    # if pyplot:
+    #     fig = plt.figure(figsize=(14, 6))
+    # else:
+    #     fig = Figure(figsize=(16, 8))
 
     fig.suptitle(
         r"$Palv_{0_2} = Finsp_{O_2}*((P_{atm} - P_{H_2O}) - Pa_{CO_2}/Q_r)$"
@@ -1055,13 +1062,13 @@ def plot_cascO2(
 
     ind = np.arange(4)  # class histo (insp-aerien-alveolaire-artériel)
     width = 0.2  # distance entre les plots
-    for i, (k, item) in enumerate(values.items()):
+    for i, (k, casc) in enumerate(cascades.items()):
         label = f"g{str(int(k))}"
         if k == 0:
             label = "ref"
         ax.bar(
             ind + i * width,
-            item,
+            casc,
             width,
             alpha=0.6,
             label=label,
@@ -1081,15 +1088,18 @@ def plot_cascO2(
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
 
-    for j, lst in enumerate(values):
-        for i, item in enumerate(lst):
-            ax.annotate(
-                str(int(lst[i])),
-                xy=(1, 2),
-                color="tab:grey",
-                xytext=(i + j * width, lst[i] + 5),
-                horizontalalignment="center",
-            )
+    for j, casc in enumerate(cascades.values()):
+        for i, val in enumerate(casc):
+            try:
+                ax.annotate(
+                    str(int(val)),
+                    xy=(1, 2),
+                    color="tab:grey",
+                    xytext=(i + j * width, val + 5),
+                    horizontalalignment="center",
+                )
+            except ValueError:
+                continue
 
     if pyplot:
         # #fig.set.tight_layout(True)
@@ -1133,14 +1143,17 @@ def plot_cascO2Lin(
     """
     if savedir is None:
         savedir = os.path.expanduser("~")
-    # ref
+    if type(nums) != list:
+        nums = [
+            nums,
+        ]
     if 0 not in nums:
         nums.insert(0, 0)
-    values = {}
+    cascades = {}
     for num in nums:
         if num in range(len(gases)):
             gas = gases[num]
-            values[num] = gas.casc()
+            cascades[num] = gas.casc()
     if pyplot:
         fig = plt.figure(figsize=(14, 6))
     else:
@@ -1150,7 +1163,7 @@ def plot_cascO2Lin(
     ax = fig.add_subplot(111)
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
-    for i, (k, val) in enumerate(values.items()):
+    for i, (k, val) in enumerate(cascades.items()):
         label = f"gas {int(k)}"
         if k == 0:
             label = "ref"
@@ -1168,14 +1181,14 @@ def plot_cascO2Lin(
     st1 = r"$Palv_{0_2} = Finsp_{O_2}*((P_{atm} - P_{H_2O}) - Pa_{CO_2}/Q_r)$"
     st2 = r" avec $P_{atm}=760 mmHg, \ P_{H_2O} = 47\ mmHg\ et\ Q_r \sim 0.8 $"
     ax.text(0, 50, st1 + st2, fontsize=14, alpha=0.6)
-    try:
-        for lst in values.values():
-            for i, item in enumerate(lst):
-                ax.annotate(str(int(lst[i])), xy=(i + 0.1, item), alpha=0.6)
-    except ValueError:
-        breakpoint()
-        print("plot_cascO2Lin some values are missing")
-        logging.warning("plot_cascO2Lin some values are missing")
+    for casc in cascades.values():
+        for i, val in enumerate(casc):
+            try:
+                ax.annotate(str(int(val)), xy=(i + 0.1, val), alpha=0.6)
+            except ValueError:
+                print("plot_cascO2Lin some values are missing")
+                logging.warning("plot_cascO2Lin some values are missing")
+                continue
     # fig.set.tight_layout(True)
     if pyplot:
         fig.tight_layout()
@@ -1633,6 +1646,9 @@ def plot_satHb(
     else:
         O2max = 200
     O2Range = np.arange(1, O2max)
+
+    if species is None:
+        logging.warning(f"{species=} is not defined")
 
     sat = satHbO2(species, paO2)
 
