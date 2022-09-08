@@ -17,6 +17,16 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import pandas as pd
 
+logfile = os.path.expanduser(os.path.join("~", "blodd_gases.log"))
+logging.basicConfig(
+    level=logging.INFO,
+    force=True,
+    format="%(levelname)s:%(funcName)s:%(message)s",
+    filename=logfile,
+    filemode="w+",
+    # handlers=[logging.FileHandler(logfile)],
+)
+
 rcParams.update({"font.size": 18, "font.family": "serif"})
 
 
@@ -267,7 +277,7 @@ def caO2(species: str, hb: float, po2: float) -> float:
     return cao2
 
 
-# %%
+# %
 def plot_acidbas(
     gases: list,
     num: int,
@@ -407,7 +417,7 @@ def plot_acidbas(
 
 
 # ------------------------------------
-def display(
+def plot_display(
     gases: list[Any],
     num: int,
     path: str,
@@ -491,7 +501,7 @@ def display(
     return fig
 
 
-# %%------------------------------------
+# %------------------------------------
 def phline(val: float) -> list[str]:
     """
     Return a list containing the morpion display for pH.
@@ -586,7 +596,7 @@ def hco3line(val: float) -> list[str]:
     return arrows
 
 
-def morpion(
+def plot_morpion(
     gases: list[Any],
     num: int,
     path: str,
@@ -660,7 +670,7 @@ def morpion(
     return fig
 
 
-# %%
+# %
 def plot_o2(
     gases: list[Any],
     num: int,
@@ -2060,3 +2070,11 @@ def saveGraph(
         plt.close()
     if verbose:
         print("Done")
+
+
+# %%
+if __name__ == "__main__":
+    import trainingData
+
+    data_df = trainingData.load_data()
+    gases, gasesV = trainingData.build_gases(data_df)

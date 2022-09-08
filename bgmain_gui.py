@@ -709,11 +709,11 @@ class ApplicationWindow(QMainWindow):
         if pyplot is False:
             if name == "display":
                 self.plotObjList.append(
-                    bgplot.display(gases, num, path, ident, save, pyplot)
+                    bgplot.plot_display(gases, num, path, ident, save, pyplot)
                 )
             if name == "morpion":
                 self.plotObjList.append(
-                    bgplot.morpion(gases, num, path, ident, save, pyplot)
+                    bgplot.plot_morpion(gases, num, path, ident, save, pyplot)
                 )
             if name == "acidBAse":
                 self.plotObjList.append(
@@ -783,9 +783,9 @@ class ApplicationWindow(QMainWindow):
 
         else:
             if name == "display":
-                bgplot.display(gases, num, path, ident, save, pyplot)
+                bgplot.plot_display(gases, num, path, ident, save, pyplot)
             if name == "morpion":
-                bgplot.morpion(gases, num, path, ident, save, pyplot)
+                bgplot.plot_morpion(gases, num, path, ident, save, pyplot)
             if name == "acidBAse":
                 bgplot.plot_acidbas(gases, num, path, ident, save, pyplot)
             if name == "o2":

@@ -543,8 +543,8 @@ def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
     # functions list
     plot_dico: Dict[str, List[Callable]] = {
         "all": [
-            bgplot.display,
-            bgplot.morpion,
+            bgplot.plot_display,
+            bgplot.plot_morpion,
             bgplot.plot_acidbas,
             bgplot.plot_o2,
             bgplot.plot_ventil,
@@ -560,8 +560,8 @@ def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
             bgplot.plot_ratio,
         ],
         "clin": [
-            bgplot.display,
-            bgplot.morpion,
+            bgplot.plot_display,
+            bgplot.plot_morpion,
             bgplot.plot_acidbas,
             bgplot.plot_o2,
             bgplot.plot_ventil,

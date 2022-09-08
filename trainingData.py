@@ -76,5 +76,7 @@ def build_gases(df: pd.DataFrame) -> tuple[list[Any], dict[str, Any]]:
     return gases, gasesV
 
 
-data_df = load_data()
-gases, gasesV = build_gases(data_df)
+if __name__ == "__main__":
+
+    data_df = load_data()
+    gases, gasesV = build_gases(data_df)
