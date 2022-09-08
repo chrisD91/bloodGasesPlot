@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jul 22 14:59:42 2022
+Created on Fri Jul 22 14:59:42 2022.
+
+Shared plot functions
 
 @author: cdesbois
 """

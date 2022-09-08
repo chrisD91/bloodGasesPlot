@@ -1,8 +1,12 @@
-#! /Volumes/USERS/cdesbois/anaconda/bin/python  ###########  /usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
-for manual use of the plotting
+Created on Thu Sep  8 11:23:33 2022.
+
+For manual use of the plotting.
+
+
+@author: cdesbois
 """
 
 import os
@@ -44,7 +48,7 @@ def build_path() -> Any:
     """
     Build variable paths_b (Bunch class).
 
-    return
+    Return
     ------
         bunch, attributes: locations (root, data, record, save, pict)
     """

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 16 15:26:14 2016
+Created on Tue Feb 16 15:26:14 2016.
 
 @author: cdesbois
 """
@@ -20,13 +20,13 @@ import pandas as pd
 rcParams.update({"font.size": 18, "font.family": "serif"})
 
 
-def round_lims(values: Set, round_value: float = 5) -> tuple[float, float]:
+def round_lims(limits: Set, round_value: float = 5) -> tuple[float, float]:
     """
-    return a tuple (min, max) of floor-ceil % round_value
+    Return a tuple (min, max) of floor-ceil % round_value.
 
     Parameters
     ----------
-    values : Set
+    limits: Set
         contain the axes limits (real and expected).
     round_value : float, optional(efault is 5)
         the rounded value desired
@@ -37,15 +37,15 @@ def round_lims(values: Set, round_value: float = 5) -> tuple[float, float]:
         (min, max) to be used
 
     """
-    mini = floor(min(values) / round_value) * round_value
-    maxi = ceil(max(values) / round_value) * round_value
+    mini = floor(min(limits) / round_value) * round_value
+    maxi = ceil(max(limits) / round_value) * round_value
     return (mini, maxi)
 
 
 # ==============================================================================
 class Gas:
     """
-    + gas class to manipulate bloodGases
+    Gas class to manipulate bloodGases.
 
     + Gas(spec='horse', hb=12, fio2=0.21, po2=95, ph=7.4, pco2=40, hco3=24, etco2=38)
 
@@ -83,6 +83,7 @@ class Gas:
 
     @classmethod
     def return_gasList(cls) -> list[Any]:
+        """Get global list of gas objects."""
         return Gas.gasesGasList
 
     def values(self) -> dict[str, Any]:
@@ -100,14 +101,19 @@ class Gas:
 
     # to be able to print values
     def __str__(self) -> str:
+        """Str description."""
         txt1 = f"species={self.spec} hb={self.hb} fio2={self.fio2} po2=self.po2)"
         txt2 = f"ph={self.ph} pco2={self.pco2} hco3={self.hco3} etco2={self.etco2}"
         return f"{txt1} \n {txt2}"
 
     def casc(self) -> list[float]:
         """
-        compute the O2 cascade
-        return a list (pinsp, paerien, pAo2 and paO2)
+        Compute the O2 cascade.
+
+        Returns
+        -------
+        list[float]
+            list (pinsp, paerien, pAo2 and paO2)
         """
         ph2o = 47
         patm = 760
@@ -121,9 +127,19 @@ class Gas:
 
     def piecasc(self) -> list[dict[str, float]]:
         """
+        Compute the O2 cascade values in %.
+
         return oxygen cascade values (%),
         input params = fio2 (0.), paco2 (mmHg) pao2 (mmHg)
         output = casc (list) ie [pinsp, paerien, pAO2, paO2]
+
+
+        Returns
+        -------
+        list[dict[str, float]]
+            keys: inspired, aerial & alveolar
+            values : [pinsp, paerial, pAo2 and paO2]
+
         """
         ph2o = 47
         patm = 760
@@ -150,7 +166,8 @@ class Gas:
 # hill function parameters
 def satFit(species: str) -> dict[str, Any]:
     """
-    return hill function parameters to be able to rebuild saturation curve
+    Return hill function parameters to be able to rebuild saturation curve.
+
     Parameters
     ----------
     species : str
@@ -159,7 +176,7 @@ def satFit(species: str) -> dict[str, Any]:
     Returns
     -------
     Dict[str, Any]
-        keys are 'base', 'max', 'rate', 'xhalf'
+        keys : 'base', 'max', 'rate', 'xhalf'
 
     """
     species_list = ["horse", "dog", "cat", "human"]
@@ -200,9 +217,18 @@ def satHbO2(
     species: str, po2: float
 ) -> float:  # species = horse or dog or cat or human
     """
-    return the satHbO2 value
-    input : species (horse, dog, cat, human), PO2
-    output : sat value
+    Return the satHbO2 value.
+
+    Parameters
+    ----------
+    species : str
+        in [horse, dog, cat, human]
+    po2: float
+        the arterial oxygen value
+    Returns
+    -------
+    float:
+        the sat value
     """
     #    species = mes['species']
     #    po2 = mes['po2']
@@ -217,9 +243,22 @@ def satHbO2(
 
 def caO2(species: str, hb: float, po2: float) -> float:
     """
-    return the CaO2 value
-    input : species (horse, dog, cat, human), PO2
-    output : sat value
+    Return the the arterial content in oxygen (caO2).
+
+    Parameters
+    ----------
+    species : str
+        in [horse, dog, cat, human].
+    hb : float
+        the Hb content.
+    po2 : float
+        the arterial oxygen (in mmHg).
+
+    Returns
+    -------
+    float
+        the arterial content in oxygen.
+
     """
     #  po2 = mes['po2']
     #  hb = mes ['hb']
@@ -238,7 +277,7 @@ def plot_acidbas(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot acid-base
+    Plot the acid-base analysis.
 
     Parameters
     ----------
@@ -257,9 +296,8 @@ def plot_acidbas(
 
     Returns
     -------
-    fig : TYPE
-        plt.Figure or matplotlib.Figure
-
+    fig : plt.Figure or matplotlib.Figure
+        the plot
     """
     if num > 1:
         gas = gases[num]
@@ -275,7 +313,6 @@ def plot_acidbas(
     hco3 = gas.hco3
 
     if pyplot:
-        # fig = plt.figure(figsize=(14, 8), frameon=True)
         fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(14, 8), frameon=True)
     else:
         fig = Figure(figsize=(14, 8), frameon=True)
@@ -379,7 +416,7 @@ def display(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot a display pf the gas values
+    Plot a display of the gas values.
 
     Parameters
     ----------
@@ -398,12 +435,11 @@ def display(
 
     Returns
     -------
-    fig : TYPE
-        plt.Figure or matplotlib.Figure
-
+    fig : plt.Figure or matplotlib.Figure
+        the plot
     """
     # title = "mesured values"
-    gasKey = ["num", "spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
+    rows = ["num", "spec", "hb", "fio2", "po2", "ph", "pco2", "hco3", "etco2"]
     usualVal: dict[str, Any] = {}
     if len(gases) == 1:
         used_num = 0  # only reference
@@ -421,9 +457,8 @@ def display(
 
     data = []
     data.append([used_num, used_num])
-    for item in gasKey[1:]:
-        data.append([getattr(gases[used_num], item), usualVal[item]])
-    rows = gasKey
+    for row in rows[1:]:
+        data.append([getattr(gases[used_num], row), usualVal[row]])
     cols = ["mesure", "usual"]
 
     if pyplot:
@@ -459,7 +494,7 @@ def display(
 # %%------------------------------------
 def phline(val: float) -> list[str]:
     """
-    return a list containing the morpion display for pH
+    Return a list containing the morpion display for pH.
 
     Parameters
     ----------
@@ -472,34 +507,33 @@ def phline(val: float) -> list[str]:
         the signs to use for the morpion display.
 
     """
-
     ref = [7.2, 7.35, 7.45, 7.5]
     # base
-    arrow = ["-", "-", "-"]
+    arrows = ["-", "-", "-"]
     # low´´
     if val < ref[0]:
-        arrow[0] = "<<"
+        arrows[0] = "<<"
     elif ref[0] < val < ref[1]:
-        arrow[0] = "x"
+        arrows[0] = "x"
     # middle
     elif ref[1] < val < ref[2]:
-        arrow[1] = "x"
+        arrows[1] = "x"
     # hight
     elif ref[1] < val < ref[2]:
-        arrow[2] = "x"
+        arrows[2] = "x"
     elif ref[3] < val < ref[2]:
-        arrow[2] = ">>"
-    return arrow
+        arrows[2] = ">>"
+    return arrows
 
 
 def co2line(val: float) -> list[str]:
     """
-    return a list containing the morpion display for CO2
+    Return a list containing the morpion display for CO2.
 
     Parameters
     ----------
     val : float
-        the co2 value.
+        the co2 value (in mmHg).
 
     Returns
     -------
@@ -508,23 +542,23 @@ def co2line(val: float) -> list[str]:
 
     """
     ref = [60, 42, 38, 30]  # NB data are presented in acid , norm, basic order
-    arrow = ["-", "–", "-"]
+    arrows = ["-", "–", "-"]
     if val > ref[0]:
-        arrow[0] = "<<"
+        arrows[0] = "<<"
     elif ref[0] > val > ref[1]:
-        arrow[0] = "x"
+        arrows[0] = "x"
     elif ref[1] > val > ref[2]:
-        arrow[1] = "x"
+        arrows[1] = "x"
     elif ref[2] > val > ref[3]:
-        arrow[2] = "x"
+        arrows[2] = "x"
     elif ref[3] > val:
-        arrow[2] = ">>"
-    return arrow
+        arrows[2] = ">>"
+    return arrows
 
 
 def hco3line(val: float) -> list[str]:
     """
-    return a list containing the morpion display for hco3-
+    Return a list containing the morpion display for hco3-.
 
     Parameters
     ----------
@@ -538,18 +572,18 @@ def hco3line(val: float) -> list[str]:
 
     """
     ref = [14, 22, 26, 32]
-    arrow = ["-", "–", "-"]
+    arrows = ["-", "–", "-"]
     if val < ref[0]:
-        arrow[0] = "<<"
+        arrows[0] = "<<"
     elif ref[0] < val < ref[1]:
-        arrow[0] = "x"
+        arrows[0] = "x"
     elif ref[1] < val < ref[2]:
-        arrow[1] = "x"
+        arrows[1] = "x"
     elif ref[2] < val < ref[3]:
-        arrow[1] = "x"
+        arrows[1] = "x"
     elif ref[3] < val:
-        arrow[2] = ">>"
-    return arrow
+        arrows[2] = ">>"
+    return arrows
 
 
 def morpion(
@@ -561,7 +595,7 @@ def morpion(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot a 'morpion like' display
+    Plot a 'morpion like' display.
 
     Parameters
     ----------
@@ -580,8 +614,8 @@ def morpion(
 
     Returns
     -------
-    fig : TYPE
-        plt.Figure or matplotlib.Figure
+    fig : plt.Figure or matplotlib.Figure
+        the plot
     """
     gas = gases[num - 1]
     title = (
@@ -636,7 +670,7 @@ def plot_o2(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot O2
+    Plot O2.
 
     Parameters
     ----------
@@ -655,8 +689,8 @@ def plot_o2(
 
     Returns
     -------
-    fig : TYPE
-        plt.Figure or matplotlib.Figure
+    fig : plt.Figure or matplotlib.Figure
+        the plot
     """
     if num > 1:
         gas = gases[num]
@@ -723,7 +757,7 @@ def plot_ventil(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot ventil
+    Plot ventil.
 
     Parameters
     ----------
@@ -742,8 +776,7 @@ def plot_ventil(
 
     Returns
     -------
-    fig : TYPE
-        plt.Figure or matplotlib.Figure
+    fig : plt.Figure or matplotlib.Figure
     """
     if num > 1:
         gas = gases[num]
@@ -847,7 +880,7 @@ def plot_pieCasc(
 ) -> plt.Figure:
     # fio2=0.21, paco2=40
     """
-    pie charts or gas % content,
+    Pie charts or gas % content.
 
     Parameters
     ----------
@@ -866,15 +899,14 @@ def plot_pieCasc(
 
     Returns
     -------
-    fig : TYPE
-        plt.Figure or matplotlib.Figure
+    fig : plt.Figure or matplotlib.Figure
     """
     titles = ["inspiré", "aérien", "alvéolaire"]
     explodes = [[0.1, 0], [0, 0, 0.3], [0, 0, 0, 0.3]]
 
     labels = ["$N_2$", "$O_2$", "$H_2O$", "$CO_2$"]
     colors = ["tab:gray", "tab:green", "tab:cyan", "tab:orange"]
-    valKey = ["N2", "O2", "H2O", "CO2"]
+    valKeys = ["N2", "O2", "H2O", "CO2"]
     try:
         gas = gases[num]
     except IndexError:
@@ -900,7 +932,7 @@ def plot_pieCasc(
         ax = fig.add_subplot(1, 3, i)
         ax.set_title(titles[i - 1], y=0.99, alpha=0.5)
         values = []
-        for ind in valKey[: i + 1]:
+        for ind in valKeys[: i + 1]:
             values.append(val[i - 1][ind])
         if pcent:
             ax.pie(
@@ -954,7 +986,7 @@ def plot_cascO2(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot the O2 cascade
+    Plot the O2 cascade.
 
     Parameters
     ----------
@@ -1054,7 +1086,7 @@ def plot_cascO2Lin(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot the O2 cascade
+    Plot the O2 cascade.
 
     Parameters
     ----------
@@ -1139,7 +1171,8 @@ def plot_GAa(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot alveolo-arterial gradiant
+    Plot alveolo-arterial gradient.
+
     Parameters
     ----------
     gases : list
@@ -1214,7 +1247,7 @@ def plot_ratio(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot ratio O2insp / PaO2
+    Plot the ratio O2insp / PaO2.
 
     Parameters
     ----------
@@ -1325,7 +1358,7 @@ def plot_GAaRatio(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot alveolo-arterial gradiant
+    Plot alveolo-arterial gradient.
 
     Parameters
     ----------
@@ -1458,7 +1491,7 @@ def plot_RatioVsFio2(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot ratio vs FIO2
+    Plot ratio vs FIO2.
 
     Parameters
     ----------
@@ -1532,7 +1565,7 @@ def plot_satHb(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot ratio vs FIO2
+    Plot ratio vs FIO2.
 
     Parameters
     ----------
@@ -1621,7 +1654,7 @@ def plot_CaO2(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot CaO2
+    Plot CaO2.
 
     Parameters
     ----------
@@ -1706,7 +1739,7 @@ def plot_varCaO2(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot CaO2 and CaO2 variation (slope)
+    Plot CaO2 and CaO2 variation (slope).
 
     Parameters
     ----------
@@ -1806,7 +1839,7 @@ def plot_hbEffect(
     pyplot: bool = False,
 ) -> plt.Figure:
     """
-    plot CaO2 for several Hb contents
+    Plot CaO2 for several Hb contents.
 
     Parameters
     ----------
@@ -1879,7 +1912,7 @@ def plot_satHorseDog(
     savepath: str, ident: str = "", save: bool = False, pyplot: bool = False
 ) -> plt.Figure:
     """
-    plot satHb horse and dog
+    Plot satHb horse and dog.
 
     Parameters
     ----------
@@ -1896,7 +1929,6 @@ def plot_satHorseDog(
     -------
     fig : plt.Figure or matplotlib.Figure
     """
-
     if pyplot:
         fig = plt.figure(figsize=(10, 8))
     else:
@@ -1934,7 +1966,7 @@ def plot_satHorseDog(
 
 def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt.Figure:
     """
-    to include a picture
+    To include a picture.
 
     Parameters
     ----------
@@ -1988,7 +2020,9 @@ def showPicture(files: list[str], folderPath: str = "~", title: str = "") -> plt
 def saveGraph(
     path: str, ext: str = "png", close: bool = True, verbose: bool = True
 ) -> None:
-    """Save a figure from pyplot.
+    """
+    Save a figure from pyplot.
+
     Parameters
     ----------
     path : string

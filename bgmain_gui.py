@@ -1,9 +1,13 @@
-#! /Users/cdesbois/anaconda3/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Created on Thu Sep  8 11:25:43 2022.
 
-"""
 a pyQt module to plot arterial blood gases
+
+@author: cdesbois
 """
+
 import sys
 import copy
 import logging
@@ -44,8 +48,9 @@ gasesV["g0"] = g0.__dict__
 
 class SelectGas(QWidget):
     """
-    Qwidget to be abble to create new gas values (Gas class),
-    and add them in the bloodGases list ('gases') and dictionary ('gasesV').
+    Qwidget to create new gas values (Gas class).
+
+    NB add them in the bloodGases list ('gases') and dictionary ('gasesV').
     """
 
     #    def __init__(self): #, gases, gasesV):
@@ -123,6 +128,7 @@ class SelectGas(QWidget):
         # self.gasBox.addWidget(exampleFile)
 
     def defaults_Values(self, num: int = 0) -> None:
+        """Defaults."""
         # print('f= defaults_Values')
         self.bgObj = copy.deepcopy(self.gases[num])
         self.num = num
@@ -131,6 +137,7 @@ class SelectGas(QWidget):
                 setattr(self, key, getattr(self.bgObj, key))
 
     def create_Table(self) -> None:
+        """Build Table."""
         # print('f=create_Table')
         # val = ['num', 'spec', 'hb','fio2','po2','ph','pco2','hco3','etco2']
         self.tableWidget = QTableWidget(len(self.gasKey), 1)
@@ -143,7 +150,8 @@ class SelectGas(QWidget):
 
     def print_gas(self, name: str) -> None:
         """
-        to print the values in self.key, self.gasVal[key], and self.obj[key]
+        Print the values in self.key, self.gasVal[key], and self.obj[key].
+
         removed gasVal in this version (not needed)
         """
         print("\n", name)
@@ -157,7 +165,7 @@ class SelectGas(QWidget):
                 print(key, "\t", getattr(self, key), "\t\t", getattr(self.bgObj, key))
 
     def self_to_table(self) -> None:
-        """self.attr to table"""
+        """Self.attr to table."""
         # print('f=self_to_table')
         # self.print_gas('before updateTable')
         for n, item in enumerate(self.gasKey):
@@ -165,6 +173,7 @@ class SelectGas(QWidget):
         # self.print_gas('after updateTable')
 
     def table_to_self(self, num: int) -> None:
+        """Table to self."""
         # print('f=table_to_self')
         self.num = len(gases)
         self.spec = str(self.tableWidget.item(1, 0).text())
@@ -174,12 +183,14 @@ class SelectGas(QWidget):
             setattr(self, key, float(val))
 
     def self_to_selfObj(self, num: int) -> None:
+        """Self_to_selfObj."""
         # print('f=self_to_selfObj')
         for key in self.gasKey:
             if key != "num":
                 setattr(self.bgObj, key, getattr(self, key))
 
     def selfObj_to_self(self, num: int) -> None:
+        """SelfObj_to_self."""
         # print('f=selfObj_to_self')
         self.bgObj = copy.deepcopy(self.gases[num])
         self.num = num
@@ -187,12 +198,13 @@ class SelectGas(QWidget):
             if key != "num":
                 setattr(self, key, getattr(self.bgObj, key))
 
-    @pyqtSlot()  # create the method
+    @pyqtSlot()
     def change_gas(self, num: int = 0) -> None:
         # print('f=change_gas')
         """
-        change obj from gases[num]
-        update the self.value parameters
+        Change obj from gases[num].
+
+        & update the self.value parameters.
         """
         # print('\n', "f=update_Values, targetNum= ", num, 'currentNum= ', self.num)
         # self.print_gas('changeGas before')
@@ -205,8 +217,9 @@ class SelectGas(QWidget):
                 pass
         # self.print_gas("changeGas after")
 
-    @pyqtSlot()  # create the method
+    @pyqtSlot()
     def prev_gas(self) -> None:
+        """Get the previous gas."""
         # print("f=prev_gas")
         # self.print_gas('before previous gas')
         num = self.num
@@ -221,10 +234,11 @@ class SelectGas(QWidget):
         else:
             QMessageBox.information(self, "str", " this is already the first gas")
 
-    @pyqtSlot()  # create the method
+    @pyqtSlot()
     def next_gas(self) -> None:
-        # print('f=next_gas')
+        """Get the next gas."""
         num = self.num
+        # print('f=next_gas')
         # print("self.num= ", num, "len(gases) = ", len(gases))
         # self.print_gas('before previous gas')
 
@@ -237,11 +251,11 @@ class SelectGas(QWidget):
             self.self_to_table()
             # print('self values after')
 
-    @pyqtSlot()  # create the method
+    @pyqtSlot()
     def new_Gas(self) -> None:
-        # print('f=new_Gas')
         """
-        create a new gas, append it to the gasesList and gasesVDict
+        Create a new gas, append it to the gasesList and gasesVDict.
+
         incremented num (to put at the end of the gases list)
         update the selfValues
         update the Table
@@ -454,7 +468,7 @@ class SelectGas(QWidget):
 # to import the Figure in a QT Widget
 # for command-line arguments
 class Qt5MplCanvas(FigureCanvas):
-    """Class to represent the FigureCanvas widget"""
+    """Class to represent the FigureCanvas widget."""
 
     def __init__(self, parent: Any, fig: plt.Figure) -> None:
         # print('f=Qt5MplCanvas init')
@@ -473,6 +487,7 @@ class Qt5MplCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
     def redraw(self, fig: plt.Figure) -> None:
+        """Redraw the canvas."""
         # print('f = redraw')
         self.fig = fig
         FigureCanvas.__init__(self, self.fig)
@@ -486,7 +501,7 @@ class Qt5MplCanvas(FigureCanvas):
 
 
 class ApplicationWindow(QMainWindow):
-    """Example main window"""
+    """Example main window."""
 
     def __init__(self) -> None:
         # print('f=ApplicationWindow init')
@@ -519,6 +534,7 @@ class ApplicationWindow(QMainWindow):
         self.home()
 
     def assign_central_Widget(self) -> None:
+        """Central window."""
         # print('f=assign_central_Widget')
         # mainWidget
         self.main_widget = QWidget(self)
@@ -538,6 +554,7 @@ class ApplicationWindow(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
     def update_central_widget(self) -> None:
+        """Update the central widget."""
         # print('f=update_central_widget')
         self.main_widget = QWidget(self)
         self.hbl = QHBoxLayout(self.main_widget)
@@ -551,6 +568,7 @@ class ApplicationWindow(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
     def home(self) -> None:
+        """Build the buttons for the toolbar."""
         # print('f=home')
         # buttons for the toolBar
         buildPlots = QAction("build plots", self)
@@ -577,6 +595,7 @@ class ApplicationWindow(QMainWindow):
         ident: str = "",
         pyplot: bool = False,
     ) -> None:
+        """Build the plots."""
         self.plotNum = plotNum  # reset the plot count
         # num = self.gas.num
         # gases = copy.deepcopy(self.gas.gases)  # ??? needed
@@ -590,6 +609,7 @@ class ApplicationWindow(QMainWindow):
         self.update_central_widget()
 
     def previous_plot(self) -> None:
+        """Move to previous plot."""
         # print('f=previous_plot')
         # try:
         #     plotNum
@@ -605,6 +625,7 @@ class ApplicationWindow(QMainWindow):
             QMessageBox.information(self, "str", "this is already the first plot")
 
     def next_plot(self) -> None:
+        """Move to the next plot."""
         # print('f=next_plot')
         # try:
         #     plotObjList
@@ -621,9 +642,11 @@ class ApplicationWindow(QMainWindow):
             QMessageBox.information(self, "str", "this is the last plot")
 
     def choose_params(self) -> None:
+        """Unused."""
         pass
 
     def close_application(self) -> None:
+        """Close the application."""
         # print('f=close_application')
         choice = QMessageBox.question(
             self,
@@ -637,10 +660,12 @@ class ApplicationWindow(QMainWindow):
             pass
 
     def editor(self) -> None:
+        """Put the texedit in the central widget."""
         self.texEdit = QTextEdit()
         self.setCentralWidget(self.texEdit)
 
     def file_open(self) -> None:
+        """Dialog to open example file."""
         fname = QFileDialog.getOpenFileName(self, "Open File", "")
         if fname[0]:
             f = open(fname[0], "r")
@@ -660,6 +685,7 @@ class ApplicationWindow(QMainWindow):
         pyplot: bool,
         pcent: bool,
     ) -> None:
+        """Generate the plots."""
         plotList = [
             "display",
             "morpion",
@@ -800,7 +826,7 @@ class ApplicationWindow(QMainWindow):
         save: bool,
         pyplot: bool,
     ) -> list[str]:
-        """select the plots to be build"""
+        """Select the plots to be build."""
         # print('f select_plots')
         pcent = False
         selections = {}

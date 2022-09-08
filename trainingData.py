@@ -1,6 +1,13 @@
-# import bloodGases2 as bg
-# import copy
-# import csv
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep  8 11:44:05 2022.
+
+To load an example file.
+
+@author: cdesbois
+"""
+
 
 import os
 import logging
