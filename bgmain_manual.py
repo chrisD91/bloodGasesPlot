@@ -526,7 +526,7 @@ def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
         'key' in ['clin', 'all'] : graphs to plot
         'num' (default =  1) : gas to plot
         'reverse' (True) : order of the plotting
-        'save' (False)
+        'saveit' (False)
         'ident' () : added to the name of the plot for reuse
         'pyplot' (True) pyplot or matplotlib.Figure
         'path' ('~/test') : to save
@@ -543,7 +543,7 @@ def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
         "key": "clin",
         "num": 1,
         "reverse": True,
-        "save": False,
+        "saveit": False,
         "ident": "",
         "pyplot": True,
         "path": "~/test",
@@ -607,7 +607,8 @@ def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
     fignames = []
     path = params["path"]
     ident = params["ident"]
-    save = params["save"]
+    # breakpoint()
+    saveit = params["saveit"]
     pyplot = params["pyplot"]
     num = int(params["num"])  # :int
     name = params.get("name", None)
@@ -615,23 +616,25 @@ def plot_figs(gases: list[Any], **kwargs: Any) -> plt.Figure:
         if func.__name__ == "plot_cascO2Lin":
             # this function needs a list of gases
             # measure + ref
-            # fig = func(gases, [0, num], path, ident, save, pyplot)
+            # fig = func(gases, [0, num], path, ident, saveit, pyplot)
             # all until measure
-            fig = func(gases, list(range(num + 1)), path, ident, save, pyplot)
+            fig = func(gases, list(range(num + 1)), path, ident, saveit, pyplot)
             # fig = item(gases, list(range(len(gases))), path, ident, save, pyplot)
         elif func.__name__ == "plot_cascO2":
             # this function needs a list of gases
             # measure + ref
-            fig = func(gases, [0, num], path, ident, save, pyplot)
+            fig = func(gases, [0, num], path, ident, saveit, pyplot)
             # all measures
             # fig = item(gases, list(range(len(gases))), path, ident, save, pyplot)
         elif func.__name__ == "plot_pieCasc":
-            fig = func(gases, num, path, ident="", save=save, pcent=True, pyplot=pyplot)
             fig = func(
-                gases, num, path, ident="", save=save, pcent=False, pyplot=pyplot
+                gases, num, path, ident="", saveit=saveit, pcent=True, pyplot=pyplot
+            )
+            fig = func(
+                gases, num, path, ident="", saveit=saveit, pcent=False, pyplot=pyplot
             )
         else:
-            fig = func(gases, num, path, ident, save, pyplot)
+            fig = func(gases, num, path, ident, saveit, pyplot)
         figlist.append(fig)
         fignames.append(func.__name__.split("_")[-1])
     for fig in figlist:
@@ -682,7 +685,7 @@ varDico: Dict[str, Any] = {
     "num": 1,  # gas number (0 = ref, first=1)
     # num = len(gases) - 1
     "reverse": False,
-    "save": False,
+    "saveit": False,
     "ident": "",
     "pyplot": True,
     "path": "",
