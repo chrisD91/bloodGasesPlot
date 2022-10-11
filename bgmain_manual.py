@@ -982,7 +982,7 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     usual = [7.34, 7.48]
     spread = set(usual) | set(ax2T.get_ylim())
     lims = bgplot.round_lims(spread, 0.2)
-    ax2.set_ylim(lims)
+    ax2T.set_ylim(lims)
     ax2T.spines["right"].set_color("tab:gray")
     ax2T.tick_params(axis="y", colors="tab:gray")
     for spine in ["top", "left"]:
