@@ -26,7 +26,7 @@ from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
 import numpy as np
 import pandas as pd
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt5.QtWidgets import QFileDialog
 
 import bgplot
 
@@ -323,7 +323,7 @@ def userinput_to_dico() -> Dict[str, Any]:
 
 # %% from file
 faulthandler.enable()
-app = QApplication(sys.argv)
+# app = QApplication(sys.argv)
 
 
 def choosefile_gui(dirname: str = None) -> str:
@@ -725,14 +725,49 @@ if csv:
 plt.close("all")
 
 
+def format_timeax(ax: plt.Axes, df: pd.DataFrame) -> None:
+    """
+    Format the time axis (elapsed time vs datetime).
+
+    Parameters
+    ----------
+    ax : plt.Axes
+        the bottom axis.
+    df : pd.dataFrame
+        the dataframe.
+
+    Returns
+    -------
+    None.
+
+    """
+    if df.index.dtype != "<M8[ns]":
+        ax.xaxis.set_ticks(np.arange(len(df)))
+        # ax.xaxis.set_ticklabels(gas_list)
+        ax.xaxis.set_ticklabels(df.heure)
+    else:
+        ticks_loc = list(ax.get_xticks())
+        ax.set_xticks(ticks_loc)
+        tlabels = [DateFormatter("%H:%M")(_) for _ in ticks_loc]
+        ax.set_xticklabels(tlabels, rotation=45)
+    ax.spines["bottom"].set_color("tab:gray")
+    ax.tick_params(axis="x", colors="tab:gray")
+
+
+def add_bottomline(fig: plt.Figure) -> None:
+    """Add the cDesbois ... bgPlot line at the bottom."""
+    fig.text(0.99, 0.01, "bgPlot", ha="right", va="bottom", alpha=0.4, size=12)
+    fig.text(0.01, 0.01, "cDesbois", ha="left", va="bottom", alpha=0.4, size=12)
+
+
 def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     """
-    Plot 02 and CO2 evolution.
+    Plot O2 and CO2 evolution.
 
     Parameters
     ----------
     df : pandas dataframe
-        (index can be set to date_time)
+        (index can be set to dtime)
 
     Returns
     -------
@@ -771,21 +806,8 @@ def plot_evol_o2co2(df: pd.DataFrame) -> plt.Figure:
     # gas_list = df.num.astype(int).astype(str).to_list()
     # gas_list = ['gas' + item for item in gas_list]
     for ax in fig.get_axes():
-        ax.spines["top"].set_visible(False)
-        ax.yaxis.set_major_locator(
-            MaxNLocator(integer=True, nbins=5, steps=[1, 2, 5, 10])
-        )
-
-        # check if index is datetime
-        if df.index.dtype != "<M8[ns]":
-            ax.xaxis.set_ticks(np.arange(len(df)))
-            # ax.xaxis.set_ticklabels(gas_list)
-            ax.xaxis.set_ticklabels(df.heure)
-        else:
-            date_format = DateFormatter("%H:%M")
-            ax.xaxis.set_major_formatter(date_format)
-        ax.spines["bottom"].set_color("tab:gray")
-        ax.tick_params(axis="x", colors="tab:gray")
+        format_timeax(ax, df)
+    add_bottomline(fig)
     fig.tight_layout()
     return fig
 
@@ -817,12 +839,16 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     ax1.yaxis.set_major_locator(
         MaxNLocator(integer=False, nbins=3, steps=[1, 2, 5, 10])
     )
+    ax1.xaxis.set_visible(False)
+    for spine in ["top", "right", "bottom"]:
+        ax1.spines[spine].set_visible(False)
 
     ax2 = fig.add_subplot(212)
     ax2.plot(df.pco2, "-o", color="tab:blue", ms=10)
     ax2.set_ylabel("$Pa CO_2$", color="tab:blue")
     usual = [36, 46]
     spread = set(usual) | set(ax2.get_ylim())
+    ax2.axhline(40, color="tab:blue", linestyle="dashed", alpha=0.6, linewidth=3)
     lims = bgplot.round_lims(spread, 5)
     ax2.set_ylim(lims)
     ax2.spines["left"].set_color("tab:blue")
@@ -834,6 +860,7 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     ax3 = ax2.twinx()
     ax3.plot(df.hco3, "-o", color="tab:orange", ms=10)
     ax3.set_ylabel("$HCO_3$", color="tab:orange")
+    # ax3.axhline(24, color="tab:orange", linestyle="dashed", alpha=0.6, linewidth=3)
     usual = [22, 29]
     spread = set(usual) | set(ax3.get_ylim())
     lims = bgplot.round_lims(spread, 1)
@@ -844,18 +871,9 @@ def plot_acidobas(df: pd.DataFrame) -> plt.Figure:
     for spine in ["top", "left"]:
         ax3.spines[spine].set_visible(False)
 
-    for ax in fig.get_axes():
-        ax.spines["top"].set_visible(False)
-        if df.index.dtype != "<M8[ns]":
-            ax.xaxis.set_ticks(np.arange(len(df)))
-            # ax.xaxis.set_ticklabels(gas_list)
-            ax.xaxis.set_ticklabels(df.heure)
-        else:
-            date_format = DateFormatter("%H:%M")
-            ax.xaxis.set_major_formatter(date_format)
-        ax.spines["bottom"].set_color("tab:gray")
-        ax.tick_params(axis="x", colors="tab:gray")
-    ax1.spines["right"].set_visible(False)
+    for ax in fig.get_axes()[1:]:
+        format_timeax(ax, df)
+    add_bottomline(fig)
     fig.tight_layout()
     return fig
 
@@ -904,16 +922,8 @@ def plot_metabo(df: pd.DataFrame) -> plt.Figure:
     for spine in ["top", "left"]:
         axT.spines[spine].set_visible(False)
     for ax in fig.get_axes():
-        ax.spines["top"].set_visible(False)
-        if df.index.dtype != "<M8[ns]":
-            ax.xaxis.set_ticks(np.arange(len(df)))
-            # ax.xaxis.set_ticklabels(np.arange(len(df)))
-            ax.xaxis.set_ticklabels(df.heure)
-        else:
-            date_format = DateFormatter("%H:%M")
-            ax.xaxis.set_major_formatter(date_format)
-        ax.spines["bottom"].set_color("tab:gray")
-        ax.tick_params(axis="x", colors="tab:gray")
+        format_timeax(ax, df)
+    add_bottomline(fig)
     fig.tight_layout()
     return fig
 
@@ -946,6 +956,7 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     ax.set_ylabel("$Na^+$", color="tab:red")
     ax.spines["left"].set_color("tab:red")
     ax.tick_params(axis="y", colors="tab:red")
+    ax.xaxis.set_visible(False)
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
 
@@ -961,6 +972,7 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
     # axT.hlines(95, *lims, colors='b', alpha=0.5, linestyles='dashed')
     axT.spines["right"].set_color("tab:blue")
     axT.tick_params(axis="y", colors="tab:blue")
+    axT.xaxis.set_visible(False)
     for spine in ["top", "left"]:
         axT.spines[spine].set_visible(False)
 
@@ -989,17 +1001,8 @@ def plot_iono(df: pd.DataFrame) -> plt.Figure:
         ax2T.spines[spine].set_visible(False)
 
     for ax in fig.get_axes():
-        ax.spines["top"].set_visible(False)
-        if df.index.dtype != "<M8[ns]":
-            ax.xaxis.set_ticks(np.arange(len(df)))
-            # ax.xaxis.set_ticklabels(np.arange(len(df)))
-            ax.xaxis.set_ticklabels(df.heure)
-        else:
-            date_format = DateFormatter("%H:%M")
-            ax.xaxis.set_major_formatter(date_format)
-        ax.spines["bottom"].set_color("tab:gray")
-        ax.tick_params(axis="x", colors="tab:gray")
-
+        format_timeax(ax, df)
+    add_bottomline(fig)
     fig.tight_layout()
     return fig
 
@@ -1032,15 +1035,8 @@ def plot_hb(df: pd.DataFrame) -> plt.Figure:
     ax.tick_params(axis="y", colors="tab:red")
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
-        if df.index.dtype != "<M8[ns]":
-            ax.xaxis.set_ticks(np.arange(len(df)))
-            # ax.xaxis.set_ticklabels(np.arange(len(df)))
-            ax.xaxis.set_ticklabels(df.heure)
-        else:
-            date_format = DateFormatter("%H:%M")
-            ax.xaxis.set_major_formatter(date_format)
-    ax.spines["bottom"].set_color("tab:gray")
-    ax.tick_params(axis="x", colors="tab:gray")
+    format_timeax(ax, df)
+    add_bottomline(fig)
     fig.tight_layout()
     return fig
 
